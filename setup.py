@@ -1,8 +1,11 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.1.0-beta.1'
+VERSION = '0.1.0-beta.2'
 DESCRIPTION = 'Conflux account'
 LONG_DESCRIPTION = 'Conflux account that can sign a conflux transaction'
+
+# python3 -m build
+# twine upload --repository cfx-account dist/*
 
 # Setting up
 setup(

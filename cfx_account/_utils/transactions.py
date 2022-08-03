@@ -18,11 +18,13 @@ from eth_utils.curried import (
     to_int,
 )
 import rlp
-from eth_account._utils.transactions import (
+from eth_account._utils.legacy_transactions import (
+    TRANSACTION_DEFAULTS,
+)
+from eth_account._utils.validation import (
     VALID_EMPTY_ADDRESSES,
     is_int_or_prefixed_hexstr,
-    is_none,
-    TRANSACTION_DEFAULTS,
+    is_none
 )
 from typing import (
     Dict,
