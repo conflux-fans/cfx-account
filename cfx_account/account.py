@@ -30,7 +30,7 @@ from cfx_address.address import Address
 class Account(EthAccount):
 
     @combomethod
-    def from_key(self, private_key):
+    def from_key(self, private_key, chain_id=None) -> LocalAccount:
         r"""
         Returns a convenient object for working with the given private key.
 
@@ -53,7 +53,7 @@ class Account(EthAccount):
             # but without the private key argument
         """
         key = self._parsePrivateKey(private_key)
-        return LocalAccount(key, self)
+        return LocalAccount(key, self, chain_id)
 
     @combomethod
     def sign_transaction(self, transaction_dict, private_key):
