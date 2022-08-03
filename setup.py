@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.3'
+VERSION = '0.0.4'
 DESCRIPTION = 'Conflux account'
 LONG_DESCRIPTION = 'Conflux account that can sign a conflux transaction'
 

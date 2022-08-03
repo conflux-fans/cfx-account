@@ -5,3 +5,4 @@ tests/__pycache__/
 build
 dist
 cfx_account.egg-info/
+__pycache__/
