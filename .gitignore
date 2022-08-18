@@ -6,3 +6,5 @@ build
 dist
 cfx_account.egg-info/
 __pycache__/
+.hypothesis/
+.vscode/

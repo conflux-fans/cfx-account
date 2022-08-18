@@ -1,3 +1,9 @@
+from typing import (
+    Any,
+    Dict,
+    Tuple
+)
+import rlp
 from cytoolz import (
     curry, # type: ignore
     dissoc, # type: ignore
@@ -19,7 +25,6 @@ from eth_utils.curried import (
     apply_one_of_formatters,
     hexstr_if_str,
 )
-import rlp
 from eth_account._utils.legacy_transactions import (
     TRANSACTION_DEFAULTS,
 )
@@ -28,10 +33,7 @@ from eth_account._utils.validation import (
     is_int_or_prefixed_hexstr,
     is_none
 )
-from typing import (
-    Any,
-    Dict,
-)
+
 from eth_rlp import (
     HashableRLP,
 )
@@ -40,10 +42,36 @@ from rlp.sedes import (
     big_endian_int,
     binary,
 )
-from cfx_address.address import Base32Address
+
+from cfx_typing import (
+    Base32Address, TxDict
+)
+
+UNSIGNED_TRANSACTION_FIELDS = (
+    ('nonce', big_endian_int),
+    ('gasPrice', big_endian_int),
+    ('gas', big_endian_int),
+    ('to', Binary.fixed_length(20, allow_empty=True)),
+    ('value', big_endian_int),
+    ('storageLimit', big_endian_int),
+    ('epochHeight', big_endian_int),
+    ('chainId', big_endian_int),
+    ('data', binary),
+)
+
+class UnsignedTransaction(HashableRLP):
+    fields = UNSIGNED_TRANSACTION_FIELDS
+
+class Transaction(HashableRLP):
+    fields = (
+        ('tx_meta', UnsignedTransaction),
+        ('v', big_endian_int),
+        ('r', big_endian_int),
+        ('s', big_endian_int),
+    )
 
 
-def serializable_unsigned_transaction_from_dict(transaction_dict):
+def serializable_unsigned_transaction_from_dict(transaction_dict: TxDict) -> UnsignedTransaction:
     assert_valid_fields(transaction_dict)
     filled_transaction = pipe(
         transaction_dict,
@@ -55,15 +83,16 @@ def serializable_unsigned_transaction_from_dict(transaction_dict):
     serializer = UnsignedTransaction
     return serializer.from_dict(filled_transaction)
 
-def encode_transaction(unsigned_transaction, vrs):
+def encode_transaction(unsigned_transaction: UnsignedTransaction, vrs: Tuple[int, int, int]) -> bytes:
     (v, r, s) = vrs
     chain_naive_transaction = dissoc(unsigned_transaction.as_dict(), 'v', 'r', 's')
     signed_transaction = Transaction(tx_meta=UnsignedTransaction(**chain_naive_transaction), v=v, r=r, s=s)
     return rlp.encode(signed_transaction)
 
-def hexstr_if_base32(transaction_dict):
-    if not (transaction_dict['to'] in VALID_EMPTY_ADDRESSES):
-        address = Base32Address(transaction_dict['to'])
+def hexstr_if_base32(transaction_dict: TxDict) -> TxDict:
+    to = transaction_dict.get("to", None)
+    if not (to in VALID_EMPTY_ADDRESSES):
+        address = Base32Address(to) # type: ignore
         transaction_dict['to'] = address.hex_address
     return transaction_dict
 
@@ -118,7 +147,7 @@ ALLOWED_TRANSACTION_KEYS = {
 
 REQUIRED_TRANSACITON_KEYS = ALLOWED_TRANSACTION_KEYS.difference(TRANSACTION_DEFAULTS.keys())
 
-def assert_valid_fields(transaction_dict):
+def assert_valid_fields(transaction_dict: Any):
     # check if any keys are missing
     missing_keys = REQUIRED_TRANSACITON_KEYS.difference(transaction_dict.keys())
     if missing_keys:
@@ -136,28 +165,5 @@ def assert_valid_fields(transaction_dict):
         invalid = {key: transaction_dict[key] for key, valid in valid_fields.items() if not valid}
         raise TypeError("Transaction had invalid fields: %r" % invalid)
 
-UNSIGNED_TRANSACTION_FIELDS = (
-    ('nonce', big_endian_int),
-    ('gasPrice', big_endian_int),
-    ('gas', big_endian_int),
-    ('to', Binary.fixed_length(20, allow_empty=True)),
-    ('value', big_endian_int),
-    ('storageLimit', big_endian_int),
-    ('epochHeight', big_endian_int),
-    ('chainId', big_endian_int),
-    ('data', binary),
-)
-
-class UnsignedTransaction(HashableRLP):
-    fields = UNSIGNED_TRANSACTION_FIELDS
-
-class Transaction(HashableRLP):
-    fields = (
-        ('tx_meta', UnsignedTransaction),
-        ('v', big_endian_int),
-        ('r', big_endian_int),
-        ('s', big_endian_int),
-    )
-
-def vrs_from(transaction):
-    return (getattr(transaction, part) for part in 'vrs')
+def vrs_from(transaction: Transaction) -> Tuple[int, int, int]:
+    return (transaction.v, transaction.r, transaction.s) # type: ignore

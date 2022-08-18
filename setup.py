@@ -21,7 +21,7 @@ setup(
     ],  # add any additional packages that
     # needs to be installed along with your package. Eg: 'caer'
 
-    keywords=['python', 'first package'],
+    keywords=['blockchain', 'conflux', "sign"],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Education",

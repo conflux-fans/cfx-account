@@ -7,7 +7,7 @@ from cfx_address import (
 from cfx_address.utils import (
     validate_network_id
 )
-from eth_typing.evm import (
+from cfx_typing import (
     ChecksumAddress,
     HexAddress,
 )

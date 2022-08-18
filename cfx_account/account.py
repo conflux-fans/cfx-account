@@ -1,4 +1,9 @@
-from typing import TYPE_CHECKING, Optional
+from typing import (
+    TYPE_CHECKING,
+    Optional,
+    Union,
+    cast
+)
 from eth_account.account import Account as EthAccount
 from cfx_address.utils import validate_network_id
 from cfx_account.signers.local import LocalAccount
@@ -32,6 +37,14 @@ from cfx_address import (
     Base32Address,
     eth_eoa_address_to_cfx_hex
 )
+from cfx_typing import (
+    TxParam,
+    TxDict,
+    HexAddress,
+)
+from eth_keys.datatypes import (
+    PrivateKey,
+)
 
 if TYPE_CHECKING:
     from conflux_web3 import Web3
@@ -39,17 +52,19 @@ if TYPE_CHECKING:
 class Account(EthAccount):
     
     # _default_network_id: Optional[int]=None
-    _w3: Optional["Web3"] = None 
+    w3: Optional["Web3"] = None 
     
     @combomethod
     def set_w3(self, w3: "Web3"):
-        self._w3 = w3
+        self.w3 = w3
     
     # def set_default_network_id(self, network_id: int):
     #     self._default_network_id = network_id
 
     @combomethod
-    def from_key(self, private_key: str, network_id: Optional[int]=None) -> LocalAccount:
+    def from_key(
+        self, private_key: Union[bytes, str, PrivateKey], network_id: Optional[int]=None
+    ) -> LocalAccount:
         """
         returns a LocalAccount object
 
@@ -72,13 +87,15 @@ class Account(EthAccount):
         if network_id is not None:
             validate_network_id(network_id)
             return LocalAccount(key, self, network_id)
-        if self._w3:
-            w3_network_id = self._w3.cfx.chain_id
+        if self.w3:
+            w3_network_id = self.w3.cfx.chain_id
             return LocalAccount(key, self, w3_network_id)
         return LocalAccount(key, self)
 
     @combomethod
-    def sign_transaction(self, transaction_dict, private_key):
+    def sign_transaction(
+        self, transaction_dict: TxParam, private_key: Union[bytes, str, PrivateKey]
+    ) -> SignedTransaction:
         """
         Sign a transaction using a local private key. Produces signature details
         and the hex-encoded transaction suitable for broadcast using
@@ -120,7 +137,7 @@ class Account(EthAccount):
             raise TypeError("transaction_dict must be dict-like, got %r" % transaction_dict)
 
         account: LocalAccount = self.from_key(private_key)
-
+        transaction_dict = cast(TxDict, transaction_dict)
         # allow from field, *only* if it matches the private key
         if 'from' in transaction_dict:
             if Base32Address(transaction_dict['from']).hex_address == account.hex_address:
@@ -152,7 +169,7 @@ class Account(EthAccount):
         )
 
     @combomethod
-    def recover_transaction(self, serialized_transaction):
+    def recover_transaction(self, serialized_transaction: bytes) -> HexAddress:
         """
         Get the address of the account that signed this transaction.
 
