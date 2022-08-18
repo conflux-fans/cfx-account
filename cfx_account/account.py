@@ -1,14 +1,18 @@
+from typing import TYPE_CHECKING, Optional
 from eth_account.account import Account as EthAccount
+from cfx_address.utils import validate_network_id
 from cfx_account.signers.local import LocalAccount
-from eth_utils.curried import (
+from eth_utils.decorators import (
     combomethod,
+)
+from eth_utils.crypto import (
     keccak,
 )
 from collections.abc import (
     Mapping,
 )
 from cytoolz import (
-    dissoc,
+    dissoc, # type: ignore
 )
 from hexbytes import (
     HexBytes,
@@ -24,36 +28,54 @@ from cfx_account._utils.transactions import (
     Transaction,
     vrs_from,
 )
-from cfx_address.utils import eth_address_to_cfx
-from cfx_address.address import Address
+from cfx_address import (
+    Base32Address,
+    eth_eoa_address_to_cfx_hex
+)
+
+if TYPE_CHECKING:
+    from conflux_web3 import Web3
 
 class Account(EthAccount):
+    
+    # _default_network_id: Optional[int]=None
+    _w3: Optional["Web3"] = None 
+    
+    @combomethod
+    def set_w3(self, w3: "Web3"):
+        self._w3 = w3
+    
+    # def set_default_network_id(self, network_id: int):
+    #     self._default_network_id = network_id
 
     @combomethod
-    def from_key(self, private_key, chain_id=None) -> LocalAccount:
-        r"""
-        Returns a convenient object for working with the given private key.
+    def from_key(self, private_key: str, network_id: Optional[int]=None) -> LocalAccount:
+        """
+        returns a LocalAccount object
 
-        :param private_key: The raw private key
-        :type private_key: hex str, bytes, int or :class:`eth_keys.datatypes.PrivateKey`
-        :return: object with methods for signing and encrypting
-        :rtype: LocalAccount
+        :param str private_key: the raw private key
+        :param Optional[int] network_id: target network of the account, defaults to None
+        :return LocalAccount: object with methods for signing and encrypting
 
-        .. doctest:: python
+        >>> acct = Account.from_key(
+        ... 0xb25c7db31feed9122727bf0939dc769a96564b2de4c4726d035b36ecf1e5b364)
+        >>> acct.address
+        '0x1ce9454909639d2d17a3f753ce7d93fa0b9ab12e'
+        >>> acct.key
+        HexBytes('0xb25c7db31feed9122727bf0939dc769a96564b2de4c4726d035b36ecf1e5b364')
 
-            >>> acct = Account.from_key(
-            ... 0xb25c7db31feed9122727bf0939dc769a96564b2de4c4726d035b36ecf1e5b364)
-            >>> acct.address
-            '0x1ce9454909639d2d17a3f753ce7d93fa0b9ab12e'
-            >>> acct.key
-            HexBytes('0xb25c7db31feed9122727bf0939dc769a96564b2de4c4726d035b36ecf1e5b364')
-
-            # These methods are also available: sign_message(), sign_transaction(), encrypt()
-            # They correspond to the same-named methods in Account.*
-            # but without the private key argument
+        # These methods are also available: sign_message(), sign_transaction(), encrypt()
+        # They correspond to the same-named methods in Account.*
+        # but without the private key argument
         """
         key = self._parsePrivateKey(private_key)
-        return LocalAccount(key, self, chain_id)
+        if network_id is not None:
+            validate_network_id(network_id)
+            return LocalAccount(key, self, network_id)
+        if self._w3:
+            w3_network_id = self._w3.cfx.chain_id
+            return LocalAccount(key, self, w3_network_id)
+        return LocalAccount(key, self)
 
     @combomethod
     def sign_transaction(self, transaction_dict, private_key):
@@ -97,17 +119,17 @@ class Account(EthAccount):
         if not isinstance(transaction_dict, Mapping):
             raise TypeError("transaction_dict must be dict-like, got %r" % transaction_dict)
 
-        account = self.from_key(private_key)
+        account: LocalAccount = self.from_key(private_key)
 
         # allow from field, *only* if it matches the private key
         if 'from' in transaction_dict:
-            if Address.normalize_hex_address(transaction_dict['from']) == account.address:
+            if Base32Address(transaction_dict['from']).hex_address == account.hex_address:
                 sanitized_transaction = dissoc(transaction_dict, 'from')
             else:
-                raise TypeError("from field must match key's %s, but it was %s" % (
-                    account.address,
-                    transaction_dict['from'],
-                ))
+                raise ValueError("transaction[from] does match key's hex address: "
+                    f"from's hex address is{Base32Address(transaction_dict['from']).hex_address}, "
+                    f"key's hex address is {account.hex_address}")
+                
         else:
             sanitized_transaction = transaction_dict
 
@@ -147,5 +169,5 @@ class Account(EthAccount):
         """
         txn_bytes = HexBytes(serialized_transaction)
         txn = Transaction.from_bytes(txn_bytes)
-        recovered_address = self._recover_hash(txn[0].hash(), vrs=vrs_from(txn))
-        return eth_address_to_cfx(recovered_address)
+        recovered_address = self._recover_hash(txn[0].hash(), vrs=vrs_from(txn)) # type: ignore
+        return eth_eoa_address_to_cfx_hex(recovered_address)

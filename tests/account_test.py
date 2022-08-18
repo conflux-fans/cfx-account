@@ -1,12 +1,12 @@
 from cfx_account.account import Account
-from cfx_address.address import Address
+from cfx_address.address import Base32Address
 from hexbytes import (
     HexBytes,
 )
 
 key = '0xcc7939276283a32f60d2fad7d16cac972300308fe99ec98d0e63765d02e24863'
 address = '0x1b981f81568edd843dcb5b407ff0dd2e25618622'
-base32_address = Address.encode_hex_address(address, 1)
+base32_address = Base32Address(address, 1)
 expected_raw_tx = '0xf861dd0101649413d2ba4ed43542e7c54fbb6c5fccb9f269c1f94c016464018080a0a52f639cbed11262a7b88d0a37aef909aa7dc2c36c40689a3d52b8bd1d9482dea054f3bdeb654f73704db4cbc12451fb4c9830ef62b0f24de1a40e4b6fe10f57b2'
 v = 0
 r = '0xa52f639cbed11262a7b88d0a37aef909aa7dc2c36c40689a3d52b8bd1d9482de'

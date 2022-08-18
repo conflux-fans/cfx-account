@@ -1,21 +1,23 @@
 from cytoolz import (
-    curry,
-    dissoc,
-    identity,
-    merge,
+    curry, # type: ignore
+    dissoc, # type: ignore
+    identity, # type: ignore
+    merge, # type: ignore
     partial,
-    pipe,
+    pipe, # type: ignore
+)
+from eth_utils.conversions import (
+    to_bytes,
+    to_int,
+)
+from eth_utils.types import (
+    is_bytes,
+    is_string,
 )
 from eth_utils.curried import (
     apply_formatters_to_dict,
     apply_one_of_formatters,
     hexstr_if_str,
-    is_0x_prefixed,
-    is_bytes,
-    is_integer,
-    is_string,
-    to_bytes,
-    to_int,
 )
 import rlp
 from eth_account._utils.legacy_transactions import (
@@ -27,6 +29,7 @@ from eth_account._utils.validation import (
     is_none
 )
 from typing import (
+    Any,
     Dict,
 )
 from eth_rlp import (
@@ -37,8 +40,7 @@ from rlp.sedes import (
     big_endian_int,
     binary,
 )
-from cfx_address.address import Address
-from eth_account._utils.validation import is_valid_address
+from cfx_address.address import Base32Address
 
 
 def serializable_unsigned_transaction_from_dict(transaction_dict):
@@ -61,17 +63,15 @@ def encode_transaction(unsigned_transaction, vrs):
 
 def hexstr_if_base32(transaction_dict):
     if not (transaction_dict['to'] in VALID_EMPTY_ADDRESSES):
-        address = Address(transaction_dict['to'])
+        address = Base32Address(transaction_dict['to'])
         transaction_dict['to'] = address.hex_address
     return transaction_dict
 
-def is_empty_or_valid_address(val):
+def is_empty_or_valid_base32_address(val: Any) -> bool:
     if val in VALID_EMPTY_ADDRESSES:
         return True
-    elif Address.has_network_prefix(val):
-        return Address.is_valid_base32(val)
     else:
-        return is_valid_address(val)
+        return Base32Address.is_valid_base32(val)
 
 TRANSACTION_FORMATTERS = {
     'nonce': hexstr_if_str(to_int),
@@ -96,7 +96,7 @@ TRANSACTION_VALID_VALUES = {
     'nonce': is_int_or_prefixed_hexstr,
     'gasPrice': is_int_or_prefixed_hexstr,
     'gas': is_int_or_prefixed_hexstr,
-    'to': is_empty_or_valid_address,
+    'to': is_empty_or_valid_base32_address,
     'value': is_int_or_prefixed_hexstr,
     'storageLimit': is_int_or_prefixed_hexstr,
     'epochHeight': is_int_or_prefixed_hexstr,

@@ -1,6 +1,5 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.1.0-beta.2'
 DESCRIPTION = 'Conflux account'
 LONG_DESCRIPTION = 'Conflux account that can sign a conflux transaction'
 
@@ -9,9 +8,8 @@ LONG_DESCRIPTION = 'Conflux account that can sign a conflux transaction'
 
 # Setting up
 setup(
-    # the name must match the folder name 'verysimplemodule'
     name="cfx-account",
-    version=VERSION,
+    version="0.1.0-beta.2", # edit using bumpversion
     author="The conflux foundation",
     author_email="wangpan@conflux-chain.org",
     description=DESCRIPTION,
@@ -19,7 +17,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "eth-account>=0.6.0,<0.7.0",
-        "cfx-address"
+        "cfx-address>=1.0.0b1"
     ],  # add any additional packages that
     # needs to be installed along with your package. Eg: 'caer'
 
