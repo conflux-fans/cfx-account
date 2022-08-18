@@ -9,7 +9,7 @@ LONG_DESCRIPTION = 'Conflux account that can sign a conflux transaction'
 # Setting up
 setup(
     name="cfx-account",
-    version="0.1.0-beta.2", # edit using bumpversion
+    version="0.1.0-beta.3", # edit using bumpversion
     author="The conflux foundation",
     author_email="wangpan@conflux-chain.org",
     description=DESCRIPTION,
