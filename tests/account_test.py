@@ -1,12 +1,17 @@
-from cfx_account.account import Account
-from cfx_address.address import Base32Address
+import pytest
+from cfx_account.account import (
+    Account
+)
+from cfx_utils.exceptions import (
+    InvalidNetworkId
+)
 from hexbytes import (
     HexBytes,
 )
 
 key = '0xcc7939276283a32f60d2fad7d16cac972300308fe99ec98d0e63765d02e24863'
 address = '0x1b981f81568edd843dcb5b407ff0dd2e25618622'
-base32_address = Base32Address(address, 1)
+base32_address = 'cfxtest:aar3uh6bm4hr5bb73rrya99u5y1cm2pgeja196rfeb'
 expected_raw_tx = '0xf861dd0101649413d2ba4ed43542e7c54fbb6c5fccb9f269c1f94c016464018080a0a52f639cbed11262a7b88d0a37aef909aa7dc2c36c40689a3d52b8bd1d9482dea054f3bdeb654f73704db4cbc12451fb4c9830ef62b0f24de1a40e4b6fe10f57b2'
 v = 0
 r = '0xa52f639cbed11262a7b88d0a37aef909aa7dc2c36c40689a3d52b8bd1d9482de'
@@ -19,7 +24,6 @@ transaction = {
     'to': 'cfxtest:aak7fsws4u4yf38fk870218p1h3gxut3ku00u1k1da',
     'nonce': 1,
     'value': 1,
-    # data: '0x',
     'gas': 100,
     'gasPrice': 1,
     'storageLimit': 100,
@@ -39,8 +43,19 @@ def test_sign_and_recover():
     recovered_address = Account.recover_transaction(expected_raw_tx)
     assert recovered_address == address
 
-def test_account():
-    # account = Account.create()
-    account = Account.from_key('0x1d7390934e46ffa0e7d6216841b58fa0c3624f3e19925508fbb55eec9a93f37f')
-    # print(account.key.hex())
-    print(account.address)
+def test_local_account():
+    assert Account.from_key(key).address == address
+    assert Account.from_key(key, network_id=1).address == base32_address
+    assert Account.from_key(key, network_id=1).hex_address == address
+    assert Account.from_key(key).get_base32_address(1) == base32_address
+    
+    local_account = Account.from_key(key)
+    local_account.network_id = 1
+    assert local_account.network_id == 1
+    with pytest.raises(InvalidNetworkId):
+        local_account.network_id = 0
+    assert local_account.address == base32_address
+
+# TODO: finish the test after python-conflux-sdk's beta release
+# def test_set_w3():
+#     pass

@@ -1,10 +1,13 @@
 from typing import (
     Tuple
 )
-from cfx_typing import (
-    PrivateKey,
+from cfx_utils.types import (
     TxDict
 )
+from eth_keys.datatypes import (
+    PrivateKey
+)
+
 from .transactions import (
     encode_transaction,
     serializable_unsigned_transaction_from_dict,

@@ -7,7 +7,7 @@ from cfx_address import (
 from cfx_address.utils import (
     validate_network_id
 )
-from cfx_typing import (
+from cfx_utils.types import (
     ChecksumAddress,
     HexAddress,
 )

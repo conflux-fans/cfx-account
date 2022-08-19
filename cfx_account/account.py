@@ -7,9 +7,6 @@ from typing import (
 from eth_account.account import Account as EthAccount
 from cfx_address.utils import validate_network_id
 from cfx_account.signers.local import LocalAccount
-from eth_utils.decorators import (
-    combomethod,
-)
 from eth_utils.crypto import (
     keccak,
 )
@@ -37,10 +34,13 @@ from cfx_address import (
     Base32Address,
     eth_eoa_address_to_cfx_hex
 )
-from cfx_typing import (
+from cfx_utils.types import (
     TxParam,
     TxDict,
     HexAddress,
+)
+from cfx_utils.decorators import (
+    combomethod,
 )
 from eth_keys.datatypes import (
     PrivateKey,
@@ -99,39 +99,39 @@ class Account(EthAccount):
         """
         Sign a transaction using a local private key. Produces signature details
         and the hex-encoded transaction suitable for broadcast using
-        :meth:`w3.eth.sendRawTransaction() <web3.eth.Eth.sendRawTransaction>`.
+        :meth:`w3.cfx.sendRawTransaction() <web3.client.Cfx.sendRawTransaction>`.
 
         Create the transaction dict for a contract method with
         `my_contract.functions.my_function().buildTransaction()
         <http://web3py.readthedocs.io/en/latest/contracts.html#methods>`_
 
-        :param dict transaction_dict: the transaction with keys:
-          nonce, chainId, to, data, value, gas, and gasPrice.
-        :param private_key: the private key to sign the data with
-        :type private_key: hex str, bytes, int or :class:`eth_keys.datatypes.PrivateKey`
-        :returns: Various details about the signature - most
+        :param TxParam transaction_dict: the transaction with keys:
+          nonce, chainId, to, data, value, storageLimit, epochHeight, gas, and gasPrice.
+        :param Union[bytes, str, PrivateKey] private_key: private_key to be used for signing
+        :raises TypeError: transaction_dict is not a dict-like object
+        :raises ValueError: transaction's from field does not match private_key
+        :return SignedTransaction: an attribute dict contains various details about the signature - most
           importantly the fields: v, r, and s
-        :rtype: AttributeDict
-
-        .. code-block:: python
-
-            >>> transaction = {
-                    # Note that the address must be in checksum format or native bytes:
-                    'to': '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
-                    'value': 1000000000,
-                    'gas': 2000000,
-                    'gasPrice': 234567897654321,
-                    'nonce': 0,
-                    'chainId': 1
-                }
-            >>> key = '0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318'
-            >>> signed = Account.sign_transaction(transaction, key)
-            {'hash': HexBytes('0x6893a6ee8df79b0f5d64a180cd1ef35d030f3e296a5361cf04d02ce720d32ec5'),
-             'r': 4487286261793418179817841024889747115779324305375823110249149479905075174044,
-             'rawTransaction': HexBytes('0xf86a8086d55698372431831e848094f0109fc8df283027b6285cc889f5aa624eac1f55843b9aca008025a009ebb6ca057a0535d6186462bc0b465b561c94a295bdb0621fc19208ab149a9ca0440ffd775ce91a833ab410777204d5341a6f9fa91216a6f3ee2c051fea6a0428'),  # noqa: E501
-             's': 30785525769477805655994251009256770582792548537338581640010273753578382951464,
-             'v': 37}
-            >>> w3.eth.sendRawTransaction(signed.rawTransaction)
+    
+        >>> transaction = {
+                # Note that the address must be in Base32 format or native bytes:
+                'to': 'cfxtest:aak7fsws4u4yf38fk870218p1h3gxut3ku00u1k1da',
+                'nonce': 1,
+                'value': 1,
+                'gas': 100,
+                'gasPrice': 1,
+                'storageLimit': 100,
+                'epochHeight': 100,
+                'chainId': 1
+            }
+        >>> key = '0xcc7939276283a32f60d2fad7d16cac972300308fe99ec98d0e63765d02e24863'
+        >>> signed = Account.sign_transaction(transaction, key)
+        {'hash': HexBytes('0x692a0ea530a264f4e80ce39f393233e90638ef929c8706802e15299fd0b042b9'),
+            'r': 74715349327018893060702835194036838027583623083228589573427622179540208747230,
+            'rawTransaction': HexBytes('0xf861dd0101649413d2ba4ed43542e7c54fbb6c5fccb9f269c1f94c016464018080a0a52f639cbed11262a7b88d0a37aef909aa7dc2c36c40689a3d52b8bd1d9482dea054f3bdeb654f73704db4cbc12451fb4c9830ef62b0f24de1a40e4b6fe10f57b2'),  # noqa: E501
+            's': 38424933894051759888751352802050752143518665905311311986258635963723328477106,
+            'v': 0}
+        >>> w3.eth.sendRawTransaction(signed.rawTransaction)
         """
         if not isinstance(transaction_dict, Mapping):
             raise TypeError("transaction_dict must be dict-like, got %r" % transaction_dict)

@@ -42,9 +42,11 @@ from rlp.sedes import (
     big_endian_int,
     binary,
 )
-
-from cfx_typing import (
-    Base32Address, TxDict
+from cfx_address import (
+    Base32Address
+)
+from cfx_utils.types import (
+    TxDict
 )
 
 UNSIGNED_TRANSACTION_FIELDS = (
