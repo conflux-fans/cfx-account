@@ -1,21 +1,53 @@
+from typing import TYPE_CHECKING, Optional, Union, Type
 from eth_account.signers.local import LocalAccount as EthLocalAccount
-from cfx_address.utils import eth_address_to_cfx
-from cfx_address import Address
+from cfx_address import (
+    eth_eoa_address_to_cfx_hex,
+    Base32Address
+)
+from cfx_address.utils import (
+    validate_network_id
+)
+from cfx_utils.types import (
+    ChecksumAddress,
+    HexAddress,
+)
+
+if TYPE_CHECKING:
+    from cfx_account import Account
+
 
 class LocalAccount(EthLocalAccount):
-    def __init__(self, key, account, chain_id=None):
-        self._chain_id = chain_id
+    def __init__(self, key, account: Union["Account", Type["Account"]], network_id: Optional[int]=None):
+        if network_id is not None:
+            validate_network_id(network_id)
+        self._network_id = network_id
+        
         super().__init__(key, account)
 
     @property
-    def address(self):
-        hex40_addr = eth_address_to_cfx(super().address)
-        if not self._chain_id:
-            return hex40_addr
-        return Address.encode_hex_address(hex40_addr, self._chain_id)
+    def network_id(self) -> Union[int, None]:
+        return self._network_id
     
-    def get_base32_address(self, specific_chain_id=None):
-        if not specific_chain_id:
-            return self.address
-        hex40_addr = eth_address_to_cfx(super().address)
-        return Address.encode_hex_address(hex40_addr, specific_chain_id)
+    @network_id.setter
+    def network_id(self, new_network_id: int):
+        validate_network_id(new_network_id)
+        self._network_id = new_network_id
+
+    @property
+    def address(self) -> Union[Base32Address, HexAddress]:
+        """
+        returns the address of the account
+
+        :return Union[Base32Address, HexAddress]: _description_
+        """
+        hex_address = self.hex_address
+        if not self._network_id:
+            return hex_address
+        return Base32Address(hex_address, self._network_id)
+
+    @property
+    def hex_address(self) -> HexAddress:
+        return eth_eoa_address_to_cfx_hex(super().address)
+    
+    def get_base32_address(self, specific_network_id: int) -> Base32Address:
+        return Base32Address(self.address, specific_network_id)
