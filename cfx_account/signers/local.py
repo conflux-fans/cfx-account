@@ -1,5 +1,9 @@
 from typing import TYPE_CHECKING, Optional, Union, Type
 from eth_account.signers.local import LocalAccount as EthLocalAccount
+from eth_account.datastructures import (
+    # SignedMessage,
+    SignedTransaction,
+)
 from cfx_address import (
     eth_eoa_address_to_cfx_hex,
     Base32Address
@@ -8,6 +12,7 @@ from cfx_address.utils import (
     validate_network_id
 )
 from cfx_utils.types import (
+    TxParam,
     ChecksumAddress,
     HexAddress,
 )
@@ -32,6 +37,9 @@ class LocalAccount(EthLocalAccount):
     def network_id(self, new_network_id: int):
         validate_network_id(new_network_id)
         self._network_id = new_network_id
+        
+    def reset_network_id(self):
+        self._network_id = None
 
     @property
     def address(self) -> Union[Base32Address, HexAddress]:
@@ -51,3 +59,7 @@ class LocalAccount(EthLocalAccount):
     
     def get_base32_address(self, specific_network_id: int) -> Base32Address:
         return Base32Address(self.address, specific_network_id)
+    
+    # add type hint
+    def sign_transaction(self, transaction_dict: TxParam) -> SignedTransaction:
+        return super().sign_transaction(transaction_dict)
