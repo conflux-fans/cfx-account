@@ -55,6 +55,8 @@ def test_local_account():
     with pytest.raises(InvalidNetworkId):
         local_account.network_id = 0
     assert local_account.address == base32_address
+    local_account.network_id = None
+    assert local_account.address == address
 
 # TODO: finish the test after python-conflux-sdk's beta release
 # def test_set_w3():

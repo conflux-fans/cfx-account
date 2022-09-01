@@ -34,12 +34,13 @@ class LocalAccount(EthLocalAccount):
         return self._network_id
     
     @network_id.setter
-    def network_id(self, new_network_id: int):
-        validate_network_id(new_network_id)
+    def network_id(self, new_network_id: Union[int, None]):
+        if new_network_id is not None:
+            validate_network_id(new_network_id)
         self._network_id = new_network_id
         
-    def reset_network_id(self):
-        self._network_id = None
+    # def reset_network_id(self):
+    #     self._network_id = None
 
     @property
     def address(self) -> Union[Base32Address, HexAddress]:
