@@ -1,9 +1,19 @@
+from typing import (
+    Tuple
+)
+from cfx_utils.types import (
+    TxDict
+)
+from eth_keys.datatypes import (
+    PrivateKey
+)
+
 from .transactions import (
     encode_transaction,
     serializable_unsigned_transaction_from_dict,
 )
 
-def sign_transaction_dict(eth_key, transaction_dict):
+def sign_transaction_dict(eth_key: PrivateKey, transaction_dict: TxDict) -> Tuple[int, int, int, bytes]:
     # generate RLP-serializable transaction, with defaults filled
     unsigned_transaction = serializable_unsigned_transaction_from_dict(transaction_dict)
 
@@ -17,6 +27,6 @@ def sign_transaction_dict(eth_key, transaction_dict):
 
     return (v, r, s, encoded_transaction)
 
-def sign_transaction_hash(key, transaction_hash):
+def sign_transaction_hash(key: PrivateKey, transaction_hash: bytes) -> Tuple[int, int, int]:
     signature = key.sign_msg_hash(transaction_hash)
     return signature.vrs
