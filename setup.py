@@ -61,16 +61,16 @@ extras_require['dev'] = (
 # Setting up
 setup(
     name="cfx-account",
-    version="0.1.0-beta.3", # edit using bumpversion
+    version="0.1.0-beta.4", # edit using bumpversion
     author="The conflux foundation",
     author_email="wangpan@conflux-chain.org",
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     packages=find_packages(),
     install_requires=[
-        "eth-account>=0.6.0,<0.7.0",
+        "eth-account~=0.7.0",
         "cfx-address>=1.0.0b4",
-        "cfx-utils>=1.0.0b1"
+        "cfx-utils>=1.0.0b4"
     ],  # add any additional packages that
     # needs to be installed along with your package. Eg: 'caer'
     extras_require=extras_require,

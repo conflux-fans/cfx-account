@@ -5,8 +5,12 @@ from typing import (
     cast
 )
 from eth_account.account import Account as EthAccount
-from cfx_address.utils import validate_network_id
-from cfx_account.signers.local import LocalAccount
+from cfx_address.utils import (
+    validate_network_id
+)
+from cfx_account.signers.local import (
+    LocalAccount
+)
 from eth_utils.crypto import (
     keccak,
 )
@@ -188,3 +192,7 @@ class Account(EthAccount):
         txn = Transaction.from_bytes(txn_bytes)
         recovered_address = self._recover_hash(txn[0].hash(), vrs=vrs_from(txn)) # type: ignore
         return eth_eoa_address_to_cfx_hex(recovered_address)
+
+    @combomethod
+    def create(self, extra_entropy: str='') -> LocalAccount:
+        return super().create(extra_entropy)
