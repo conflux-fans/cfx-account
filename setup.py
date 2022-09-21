@@ -68,7 +68,7 @@ setup(
     long_description=LONG_DESCRIPTION,
     packages=find_packages(),
     install_requires=[
-        "eth-account>=0.6.0,<0.7.0",
+        "eth-account~=0.7.0",
         "cfx-address>=1.0.0b4",
         "cfx-utils>=1.0.0b4"
     ],  # add any additional packages that

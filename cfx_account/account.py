@@ -5,8 +5,12 @@ from typing import (
     cast
 )
 from eth_account.account import Account as EthAccount
-from cfx_address.utils import validate_network_id
-from cfx_account.signers.local import LocalAccount
+from cfx_address.utils import (
+    validate_network_id
+)
+from cfx_account.signers.local import (
+    LocalAccount
+)
 from eth_utils.crypto import (
     keccak,
 )
