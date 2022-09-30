@@ -59,7 +59,7 @@ class Account(EthAccount):
     w3: Optional["Web3"] = None 
     
     @combomethod
-    def set_w3(self, w3: "Web3"):
+    def set_w3(self, w3: "Web3") -> None:
         self.w3 = w3
     
     # def set_default_network_id(self, network_id: int):
