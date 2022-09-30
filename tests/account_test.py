@@ -5,6 +5,10 @@ from cfx_account.account import (
 from cfx_utils.exceptions import (
     InvalidNetworkId
 )
+from cfx_utils.types import (
+    Drip,
+    CFX
+)
 from hexbytes import (
     HexBytes,
 )
@@ -31,7 +35,33 @@ transaction = {
     'chainId': 1
 }
 
+transaction_value_in_token = {
+    # 'from': '0x1b981f81568edd843dcb5b407ff0dd2e25618622'.lower(),
+    'from': base32_address,
+    'to': 'cfxtest:aak7fsws4u4yf38fk870218p1h3gxut3ku00u1k1da',
+    'nonce': 1,
+    'value': CFX(1)/10**18,
+    'gas': 100,
+    'gasPrice': Drip(1),
+    'storageLimit': 100,
+    'epochHeight': 100,
+    'chainId': 1
+}
+
 def test_sign_and_recover():
+    account = Account.from_key(key)
+    assert account.address == address
+    signed_tx = Account.sign_transaction(transaction, key)
+    assert v == signed_tx.v
+    assert r == HexBytes(signed_tx.r).hex()
+    assert s == HexBytes(signed_tx.s).hex()
+    assert signed_tx_hash == signed_tx.hash.hex()
+    assert expected_raw_tx == signed_tx.rawTransaction.hex()
+    recovered_address = Account.recover_transaction(expected_raw_tx)
+    assert recovered_address == address
+
+def test_sign_and_recover_in_token():
+    transaction = transaction_value_in_token
     account = Account.from_key(key)
     assert account.address == address
     signed_tx = Account.sign_transaction(transaction, key)
