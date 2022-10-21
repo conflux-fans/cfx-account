@@ -2,7 +2,7 @@ from typing import (
     TYPE_CHECKING,
     Optional,
     Union,
-    cast
+    cast,
 )
 from eth_account.account import Account as EthAccount
 from cfx_address.utils import (
@@ -42,6 +42,7 @@ from cfx_utils.types import (
     TxParam,
     TxDict,
     HexAddress,
+    HexStr,
 )
 from cfx_utils.decorators import (
     combomethod,
@@ -145,7 +146,7 @@ class Account(EthAccount):
         # allow from field, *only* if it matches the private key
         if 'from' in transaction_dict:
             if Base32Address(transaction_dict['from']).hex_address == account.hex_address:
-                sanitized_transaction = dissoc(transaction_dict, 'from')
+                sanitized_transaction = cast(TxDict, dissoc(transaction_dict, 'from'))
             else:
                 raise ValueError("transaction[from] does match key's hex address: "
                     f"from's hex address is{Base32Address(transaction_dict['from']).hex_address}, "
@@ -160,7 +161,7 @@ class Account(EthAccount):
             r,
             s,
             rlp_encoded,
-        ) = sign_transaction_dict(account._key_obj, sanitized_transaction)
+        ) = sign_transaction_dict(account._key_obj, sanitized_transaction) # type: ignore
 
         transaction_hash = keccak(rlp_encoded)
 
@@ -173,7 +174,7 @@ class Account(EthAccount):
         )
 
     @combomethod
-    def recover_transaction(self, serialized_transaction: bytes) -> HexAddress:
+    def recover_transaction(self, serialized_transaction: Union[bytes, HexStr, str]) -> HexAddress:
         """
         Get the address of the account that signed this transaction.
 

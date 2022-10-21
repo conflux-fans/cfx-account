@@ -1,5 +1,6 @@
 from typing import (
     Any,
+    Callable,
     Dict,
     Tuple
 )
@@ -122,7 +123,7 @@ TRANSACTION_FORMATTERS = {
     's': hexstr_if_str(to_int),
 }
 
-TRANSACTION_VALID_VALUES = {
+TRANSACTION_VALID_VALUES: Dict[str, Callable[[Any], bool]] = {
     'nonce': is_int_or_prefixed_hexstr,
     'gasPrice': is_int_or_prefixed_hexstr,
     'gas': is_int_or_prefixed_hexstr,
@@ -131,7 +132,7 @@ TRANSACTION_VALID_VALUES = {
     'storageLimit': is_int_or_prefixed_hexstr,
     'epochHeight': is_int_or_prefixed_hexstr,
     'chainId': is_int_or_prefixed_hexstr,
-    'data': lambda val: isinstance(val, (int, str, bytes, bytearray)),
+    'data': lambda val: isinstance(val, (int, str, bytes, bytearray)), # type: ignore
 }
 
 ALLOWED_TRANSACTION_KEYS = {
