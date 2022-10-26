@@ -1,5 +1,8 @@
 # changelog
 
-## 0.1.0-beta.7 (intended)
+## 0.1.0-beta.7
 
-* mypy support and integration
+* pylance support and integration
+* bumpversion:
+  * cfx_utils to 1.0.0b12
+  * cfx_address to 1.0.0b14
