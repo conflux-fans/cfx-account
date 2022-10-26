@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Union, Type
+from typing import TYPE_CHECKING, Any, NoReturn, Optional, Union, Type
 from eth_account.signers.local import LocalAccount as EthLocalAccount
 from eth_account.datastructures import (
     # SignedMessage,
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 
 class LocalAccount(EthLocalAccount):
-    def __init__(self, key, account: Union["Account", Type["Account"]], network_id: Optional[int]=None):
+    def __init__(self, key: Any, account: Union["Account", Type["Account"]], network_id: Optional[int]=None):
         if network_id is not None:
             validate_network_id(network_id)
         self._network_id = network_id
@@ -34,7 +34,7 @@ class LocalAccount(EthLocalAccount):
         return self._network_id
     
     @network_id.setter
-    def network_id(self, new_network_id: Union[int, None]):
+    def network_id(self, new_network_id: Union[int, None]) -> None:
         if new_network_id is not None:
             validate_network_id(new_network_id)
         self._network_id = new_network_id

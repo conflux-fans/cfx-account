@@ -1,11 +1,11 @@
 from typing import (
     Any,
+    Callable,
     Dict,
     Tuple
 )
 import rlp
 from cytoolz import (
-    curry, # type: ignore
     dissoc, # type: ignore
     identity, # type: ignore
     merge, # type: ignore
@@ -89,7 +89,7 @@ def encode_transaction(unsigned_transaction: UnsignedTransaction, vrs: Tuple[int
     (v, r, s) = vrs
     chain_naive_transaction = dissoc(unsigned_transaction.as_dict(), 'v', 'r', 's')
     signed_transaction = Transaction(tx_meta=UnsignedTransaction(**chain_naive_transaction), v=v, r=r, s=s)
-    return rlp.encode(signed_transaction)
+    return rlp.encode(signed_transaction) # type: ignore
 
 def hexstr_if_base32(transaction_dict: TxDict) -> TxDict:
     to = transaction_dict.get("to", None)
@@ -123,7 +123,7 @@ TRANSACTION_FORMATTERS = {
     's': hexstr_if_str(to_int),
 }
 
-TRANSACTION_VALID_VALUES = {
+TRANSACTION_VALID_VALUES: Dict[str, Callable[[Any], bool]] = {
     'nonce': is_int_or_prefixed_hexstr,
     'gasPrice': is_int_or_prefixed_hexstr,
     'gas': is_int_or_prefixed_hexstr,
@@ -132,7 +132,7 @@ TRANSACTION_VALID_VALUES = {
     'storageLimit': is_int_or_prefixed_hexstr,
     'epochHeight': is_int_or_prefixed_hexstr,
     'chainId': is_int_or_prefixed_hexstr,
-    'data': lambda val: isinstance(val, (int, str, bytes, bytearray)),
+    'data': lambda val: isinstance(val, (int, str, bytes, bytearray)), # type: ignore
 }
 
 ALLOWED_TRANSACTION_KEYS = {
@@ -149,7 +149,7 @@ ALLOWED_TRANSACTION_KEYS = {
 
 REQUIRED_TRANSACITON_KEYS = ALLOWED_TRANSACTION_KEYS.difference(TRANSACTION_DEFAULTS.keys())
 
-def assert_valid_fields(transaction_dict: Any):
+def assert_valid_fields(transaction_dict: Any) -> None:
     # check if any keys are missing
     missing_keys = REQUIRED_TRANSACITON_KEYS.difference(transaction_dict.keys())
     if missing_keys:
