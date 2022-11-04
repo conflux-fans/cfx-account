@@ -1,5 +1,9 @@
 # changelog
 
+## 0.1.0-beta.8
+
+* support python 3.7
+
 ## 0.1.0-beta.7
 
 * pylance support and integration
