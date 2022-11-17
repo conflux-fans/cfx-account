@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Any, NoReturn, Optional, Union, Type
+from typing import TYPE_CHECKING, Any, Optional, Union, Type
+from eth_utils.address import to_checksum_address
 from eth_account.signers.local import LocalAccount as EthLocalAccount
 from eth_account.datastructures import (
     # SignedMessage,
@@ -14,7 +15,6 @@ from cfx_address.utils import (
 from cfx_utils.types import (
     TxParam,
     ChecksumAddress,
-    HexAddress,
 )
 
 if TYPE_CHECKING:
@@ -43,11 +43,11 @@ class LocalAccount(EthLocalAccount):
     #     self._network_id = None
 
     @property
-    def address(self) -> Union[Base32Address, HexAddress]:
+    def address(self) -> Union[Base32Address, ChecksumAddress]:
         """
         returns the address of the account
 
-        :return Union[Base32Address, HexAddress]: _description_
+        :return Union[Base32Address, ChecksumAddress]: _description_
         """
         hex_address = self.hex_address
         if not self._network_id:
@@ -55,8 +55,8 @@ class LocalAccount(EthLocalAccount):
         return Base32Address(hex_address, self._network_id)
 
     @property
-    def hex_address(self) -> HexAddress:
-        return eth_eoa_address_to_cfx_hex(super().address)
+    def hex_address(self) -> ChecksumAddress:
+        return to_checksum_address(eth_eoa_address_to_cfx_hex(super().address))
     
     def get_base32_address(self, specific_network_id: int) -> Base32Address:
         return Base32Address(self.address, specific_network_id)
