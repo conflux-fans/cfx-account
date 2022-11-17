@@ -23,6 +23,9 @@ from cytoolz import (
 from hexbytes import (
     HexBytes,
 )
+from eth_utils.address import (
+    to_checksum_address
+)
 from eth_account.datastructures import (
     # SignedMessage,
     SignedTransaction,
@@ -36,12 +39,15 @@ from cfx_account._utils.transactions import (
 )
 from cfx_address import (
     Base32Address,
-    eth_eoa_address_to_cfx_hex
+    eth_eoa_address_to_cfx_hex,
+)
+from cfx_address.utils import (
+    normalize_to,
 )
 from cfx_utils.types import (
     TxParam,
     TxDict,
-    HexAddress,
+    ChecksumAddress,
     HexStr,
 )
 from cfx_utils.decorators import (
@@ -145,11 +151,11 @@ class Account(EthAccount):
         transaction_dict = cast(TxDict, transaction_dict)
         # allow from field, *only* if it matches the private key
         if 'from' in transaction_dict:
-            if Base32Address(transaction_dict['from']).hex_address == account.hex_address:
+            if normalize_to(transaction_dict['from'], None) == normalize_to(account.address, None):
                 sanitized_transaction = cast(TxDict, dissoc(transaction_dict, 'from'))
             else:
                 raise ValueError("transaction[from] does match key's hex address: "
-                    f"from's hex address is{Base32Address(transaction_dict['from']).hex_address}, "
+                    f"from's hex address is {Base32Address(transaction_dict['from']).hex_address}, "
                     f"key's hex address is {account.hex_address}")
                 
         else:
@@ -174,7 +180,7 @@ class Account(EthAccount):
         )
 
     @combomethod
-    def recover_transaction(self, serialized_transaction: Union[bytes, HexStr, str]) -> HexAddress:
+    def recover_transaction(self, serialized_transaction: Union[bytes, HexStr, str]) -> ChecksumAddress:
         """
         Get the address of the account that signed this transaction.
 
@@ -192,7 +198,7 @@ class Account(EthAccount):
         txn_bytes = HexBytes(serialized_transaction)
         txn = Transaction.from_bytes(txn_bytes)
         recovered_address = self._recover_hash(txn[0].hash(), vrs=vrs_from(txn)) # type: ignore
-        return eth_eoa_address_to_cfx_hex(recovered_address)
+        return to_checksum_address(eth_eoa_address_to_cfx_hex(recovered_address))
 
     @combomethod
     def create(self, extra_entropy: str='') -> LocalAccount:
