@@ -1,5 +1,9 @@
 # changelog
 
+## 0.1.0-beta.10
+
+* loosen eth-* dependency version
+
 ## 0.1.0-beta.9
 
 * compatibility fix to use as EthAccount
