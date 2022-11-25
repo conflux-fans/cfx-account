@@ -60,10 +60,14 @@ from eth_keys.datatypes import (
 if TYPE_CHECKING:
     from conflux_web3 import Web3
 
+CONFLUX_DEFAULT_PATH = "m/44'/503'/0'/0/0"
+
 class Account(EthAccount):
     
     # _default_network_id: Optional[int]=None
     w3: Optional["Web3"] = None 
+    
+    _use_unaudited_hdwallet_features = True
     
     @combomethod
     def set_w3(self, w3: "Web3") -> None:
@@ -178,6 +182,13 @@ class Account(EthAccount):
             s=s,
             v=v,
         )
+
+    @combomethod
+    def from_mnemonic(self,
+                      mnemonic: str,
+                      passphrase: str = "",
+                      account_path: str = CONFLUX_DEFAULT_PATH) -> LocalAccount:
+        return super().from_mnemonic(mnemonic, passphrase, account_path)
 
     @combomethod
     def recover_transaction(self, serialized_transaction: Union[bytes, HexStr, str]) -> ChecksumAddress:
