@@ -5,4 +5,4 @@ private_key_0 = "0x40d0f137665463584cc57fce2b761572a85d1cbf1601fc93d001c129b2a11
 
 def test_generate_from_mnemonic():
     acct = Account.from_mnemonic(mnemonic)
-    assert acct._private_key.hex() == private_key_0
+    assert acct.key.hex() == private_key_0
