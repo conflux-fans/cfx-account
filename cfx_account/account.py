@@ -3,6 +3,14 @@ from typing import (
     Optional,
     Union,
     cast,
+    Dict,
+    Any,
+)
+from typing_extensions import (
+    Literal
+)
+from eth_keys.datatypes import (
+    PrivateKey,
 )
 from eth_account.account import Account as EthAccount
 from cfx_address.utils import (
@@ -53,8 +61,8 @@ from cfx_utils.types import (
 from cfx_utils.decorators import (
     combomethod,
 )
-from eth_keys.datatypes import (
-    PrivateKey,
+from cfx_account.types import (
+    KeyfileDict,
 )
 
 if TYPE_CHECKING:
@@ -189,6 +197,20 @@ class Account(EthAccount):
                       passphrase: str = "",
                       account_path: str = CONFLUX_DEFAULT_PATH) -> LocalAccount:
         return super().from_mnemonic(mnemonic, passphrase, account_path)
+
+    @classmethod
+    def encrypt( # type: ignore
+        cls,
+        private_key: Union[bytes, str, PrivateKey],
+        password: str,
+        kdf: Optional[Literal["scrypt", "pbkdf2"]]=None,
+        iterations: Optional[int] = None
+    ) -> KeyfileDict:
+        return super().encrypt(private_key, password, kdf, iterations) # type: ignore
+
+    @staticmethod
+    def decrypt(keyfile_json: Union[Dict[str, Any], str, KeyfileDict], password: str) -> HexBytes:
+        return EthAccount.decrypt(keyfile_json, password)
 
     @combomethod
     def recover_transaction(self, serialized_transaction: Union[bytes, HexStr, str]) -> ChecksumAddress:
