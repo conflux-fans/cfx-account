@@ -52,6 +52,7 @@ def test_sign_and_recover():
     account = Account.from_key(key)
     assert account.address == address
     signed_tx = Account.sign_transaction(transaction, key)
+    # signed_tx = account.sign_transaction(transaction)
     assert v == signed_tx.v
     assert r == HexBytes(signed_tx.r).hex()
     assert s == HexBytes(signed_tx.s).hex()
