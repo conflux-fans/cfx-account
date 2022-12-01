@@ -5,14 +5,28 @@ from typing import (
     cast,
     Dict,
     Any,
+    Tuple,
+    TypeVar,
 )
 from typing_extensions import (
     Literal
 )
+from eth_keys import (
+    keys,
+)
 from eth_keys.datatypes import (
     PrivateKey,
 )
-from eth_account.account import Account as EthAccount
+from eth_account.account import (
+    Account as EthAccount,
+)
+from eth_account.datastructures import (
+    SignedMessage,
+    SignedTransaction,
+)
+from eth_account.messages import (
+    SignableMessage,
+)
 from cfx_address.utils import (
     validate_network_id
 )
@@ -69,6 +83,7 @@ if TYPE_CHECKING:
     from conflux_web3 import Web3
 
 CONFLUX_DEFAULT_PATH = "m/44'/503'/0'/0/0"
+VRS = TypeVar('VRS', bytes, HexStr, int)
 
 class Account(EthAccount):
     
@@ -236,3 +251,17 @@ class Account(EthAccount):
     @combomethod
     def create(self, extra_entropy: str='') -> LocalAccount:
         return super().create(extra_entropy)
+    
+    @combomethod
+    def sign_message(self,
+                     signable_message: SignableMessage,
+                     private_key: Union[bytes, HexStr, int, keys.PrivateKey]) -> SignedMessage:
+        return super().sign_message(signable_message, private_key)
+        
+    @combomethod
+    def recover_message(self,
+                        signable_message: SignableMessage,
+                        vrs: Optional[Tuple[VRS, VRS, VRS]] = None,
+                        signature: Optional[bytes] = None) -> ChecksumAddress:
+        recovered_address = super().recover_message(signable_message, vrs, signature)
+        return to_checksum_address(eth_eoa_address_to_cfx_hex(recovered_address))
