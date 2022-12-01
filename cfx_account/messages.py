@@ -36,7 +36,7 @@ text_to_bytes = text_if_str(to_bytes)
 
 
 def encode_structured_data(
-    primitive: Optional[Union[bytes, int, Mapping[str, Any]]] = None,
+    primitive: Optional[Union[bytes, int, Mapping]] = None, # type: ignore
     *,
     hexstr: Optional[str] = None,
     text: Optional[str] = None) -> SignableMessage:

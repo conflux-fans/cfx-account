@@ -30,3 +30,7 @@ jobs:
     - name: Test with pytest
       run: |
         make test
+    - name: Test compatibility with eth-account 0.5.9
+      run: |
+        pip install eth-account==0.5.9 &&
+        make test
