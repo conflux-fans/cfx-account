@@ -1,5 +1,11 @@
 # changelog
 
+## 0.1.0-beta.11
+
+* feature: support CIP-23
+* feature: support mnemonics, and use `m/44'/503'/0'/0/0` as default derive path
+* feature: support keystore encryption and decryption
+
 ## 0.1.0-beta.10
 
 * loosen eth-* dependency version
