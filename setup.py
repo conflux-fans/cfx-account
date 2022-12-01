@@ -61,7 +61,7 @@ extras_require['dev'] = (
 # Setting up
 setup(
     name="cfx-account",
-    version="0.1.0-beta.10", # edit using bumpversion
+    version="0.1.0-beta.11", # edit using bumpversion
     author="The conflux foundation",
     author_email="wangpan@conflux-chain.org",
     description=DESCRIPTION,
