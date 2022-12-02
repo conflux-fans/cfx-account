@@ -1,5 +1,9 @@
 # changelog
 
+## 0.1.0-beta.12
+
+* feature: add type hints to `LocalAccount` methods
+
 ## 0.1.0-beta.11
 
 * feature: support CIP-23
