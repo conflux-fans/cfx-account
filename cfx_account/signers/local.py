@@ -1,9 +1,13 @@
 from typing import TYPE_CHECKING, Any, Optional, Union, Type
+from typing_extensions import Literal
 from eth_utils.address import to_checksum_address
 from eth_account.signers.local import LocalAccount as EthLocalAccount
 from eth_account.datastructures import (
-    # SignedMessage,
+    SignedMessage,
     SignedTransaction,
+)
+from eth_account.messages import (
+    SignableMessage
 )
 from cfx_address import (
     eth_eoa_address_to_cfx_hex,
@@ -16,6 +20,10 @@ from cfx_utils.types import (
     TxParam,
     ChecksumAddress,
 )
+from cfx_account.types import (
+    KeyfileDict,
+)
+
 
 if TYPE_CHECKING:
     from cfx_account import Account
@@ -58,9 +66,25 @@ class LocalAccount(EthLocalAccount):
     def hex_address(self) -> ChecksumAddress:
         return to_checksum_address(eth_eoa_address_to_cfx_hex(super().address))
     
+    @property
+    def key(self) -> bytes:
+        """
+        Get the private key.
+        """
+        return super().key
+    
     def get_base32_address(self, specific_network_id: int) -> Base32Address:
         return Base32Address(self.address, specific_network_id)
     
     # add type hint
     def sign_transaction(self, transaction_dict: TxParam) -> SignedTransaction:
         return super().sign_transaction(transaction_dict)
+    
+    def sign_message(self, signable_message: SignableMessage) -> SignedMessage:
+        return super().sign_message(signable_message)
+    
+    def encrypt(self, password: str, kdf: Optional[Literal['scrypt', 'pbkdf2']]=None, iterations: Optional[int]=None) -> KeyfileDict:
+        return super().encrypt(password, kdf, iterations)
+    
+    def __bytes__(self) -> bytes:
+        return self.key
