@@ -23,12 +23,14 @@ def test_encode_structured_data():
 
 def test_sign_message():
     encoded_message = encode_defunct(text=message)
-    signed = Account.sign_message(encoded_message, private_key) # type: ignore
+    acct = Account.from_key(private_key)
+    signed = acct.sign_message(encoded_message)
     address = Account.recover_message(encoded_message, signature=signed.signature)
-    assert address == Account.from_key(private_key).address
+    assert address == acct.address
 
 def test_sign_structured_data():
     encoded_data = encode_defunct(text=message)
-    signed = Account.sign_message(encoded_data, private_key) # type: ignore
+    acct = Account.from_key(private_key)
+    signed = acct.sign_message(encoded_data)
     address = Account.recover_message(encoded_data, signature=signed.signature)
-    assert address == Account.from_key(private_key).address
+    assert address == acct.address
