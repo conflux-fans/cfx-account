@@ -11,7 +11,7 @@ extras_require = {
         # "black>=22.1.0,<23.0",
         # "flake8==3.8.3",
         # "isort>=4.2.15,<4.3.5",
-        "mypy==0.910",
+        # "mypy==0.910",
         # "types-setuptools>=57.4.4,<58",
         # "types-requests>=2.26.1,<3",
         # "types-protobuf==3.19.13",
@@ -70,8 +70,8 @@ setup(
     package_data={'cfx_account': ['py.typed']},
     install_requires=[
         "eth-account>=0.5.9",
-        "cfx-address>=1.0.0b16",
-        "cfx-utils>=1.0.0b14"
+        "cfx-address>=1.0.0",
+        "cfx-utils>=1.0.0"
     ],  # add any additional packages that
     # needs to be installed along with your package. Eg: 'caer'
     extras_require=extras_require,

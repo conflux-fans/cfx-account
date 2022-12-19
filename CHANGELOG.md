@@ -1,5 +1,9 @@
 # changelog
 
+## 1.0.0
+
+* stable release
+
 ## 0.1.0-beta.12
 
 * feature: add type hints to `LocalAccount` methods
