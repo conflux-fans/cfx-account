@@ -17,6 +17,10 @@ from eth_keys import (
 from eth_keys.datatypes import (
     PrivateKey,
 )
+from eth_account.hdaccount import (
+    key_from_seed,
+    seed_from_mnemonic,
+)
 from eth_account.account import (
     Account as EthAccount,
 )
@@ -210,8 +214,54 @@ class Account(EthAccount):
     def from_mnemonic(self,
                       mnemonic: str,
                       passphrase: str = "",
-                      account_path: str = CONFLUX_DEFAULT_PATH) -> LocalAccount:
-        return super().from_mnemonic(mnemonic, passphrase, account_path)
+                      account_path: str = CONFLUX_DEFAULT_PATH,
+                      network_id: Optional[int] = None) -> LocalAccount:
+        """
+        Generate an account from a mnemonic.
+
+        :param str mnemonic: space-separated list of BIP39 mnemonic seed words
+        :param str passphrase: Optional passphrase used to encrypt the mnemonic, defaults to ""
+        :param str account_path: pecify an alternate HD path for deriving the seed using
+            BIP32 HD wallet key derivation, defaults to CONFLUX_DEFAULT_PATH(m/44'/503'/0'/0/0)
+        :param Optional[int] network_id: the network id of returned account, defaults to None
+        :return LocalAccount: a LocalAccount object
+        
+        :examples:
+        
+        >>> from cfx_account import Account
+        >>> acct = Account.from_mnemonic('faint also eye industry survey unhappy boil public lemon myself cube sense', network_id=1)
+        >>> acct.address
+        'cfxtest:aargrnff46pmuy2g1mmrntctkhr5mzamh6nmg361n0'
+        """        
+        # acct: LocalAccount = super().from_mnemonic(mnemonic, passphrase, account_path)
+        seed = seed_from_mnemonic(mnemonic, passphrase)
+        private_key = key_from_seed(seed, account_path)
+        key = self._parsePrivateKey(private_key)
+        return LocalAccount(key, self, network_id or (self.w3 and self.w3.cfx.chain_id))
+
+    @combomethod
+    def create_with_mnemonic(self,
+                             passphrase: str = "",
+                             num_words: int = 12,
+                             language: str = "english",
+                             account_path: str = CONFLUX_DEFAULT_PATH,
+                             network_id: Optional[int] = None) -> Tuple[LocalAccount, str]:
+        """
+        Create mnemonic and derive an account using parameters
+
+        :param str passphrase: Extra passphrase to encrypt the seed phrase, defaults to ""
+        :param int num_words: Number of words to use with seed phrase. Default is 12 words.
+                              Must be one of [12, 15, 18, 21, 24].
+        :param str language: Language to use for BIP39 mnemonic seed phrase, defaults to "english"
+        :param str account_path: Specify an alternate HD path for deriving the seed using
+            BIP32 HD wallet key derivation, defaults to CONFLUX_DEFAULT_PATH(m/44'/503'/0'/0/0)
+        :param Optional[int] network_id: the network id of returned account, defaults to None
+        :return Tuple[LocalAccount, str]: a LocalAccount object and related mnemonic 
+        """        
+        acct, mnemonic = super().create_with_mnemonic(passphrase, num_words, language, account_path)
+        if network_id is not None:
+            acct.network_id = network_id
+        return acct, mnemonic
 
     @classmethod
     def encrypt( # type: ignore
