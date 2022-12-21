@@ -139,11 +139,11 @@ class Account(EthAccount):
         """
         Sign a transaction using a local private key. Produces signature details
         and the hex-encoded transaction suitable for broadcast using
-        :meth:`w3.cfx.sendRawTransaction() <web3.client.Cfx.sendRawTransaction>`.
+        :meth:`w3.cfx.send_raw_transaction() <web3.client.ConfluxClient.send_raw_transaction>`.
 
-        Create the transaction dict for a contract method with
-        `my_contract.functions.my_function().buildTransaction()
-        <http://web3py.readthedocs.io/en/latest/contracts.html#methods>`_
+        Refer to `Interact with a Contract
+        <https://python-conflux-sdk.readthedocs.io/en/latest/examples/10-send_raw_transaction.html#interact-with-a-contract>`
+        to see how to sign for a contract method using `build_transaction`
 
         :param TxParam transaction_dict: the transaction with keys:
           nonce, chainId, to, data, value, storageLimit, epochHeight, gas, and gasPrice.
@@ -171,7 +171,7 @@ class Account(EthAccount):
             'rawTransaction': HexBytes('0xf861dd0101649413d2ba4ed43542e7c54fbb6c5fccb9f269c1f94c016464018080a0a52f639cbed11262a7b88d0a37aef909aa7dc2c36c40689a3d52b8bd1d9482dea054f3bdeb654f73704db4cbc12451fb4c9830ef62b0f24de1a40e4b6fe10f57b2'),  # noqa: E501
             's': 38424933894051759888751352802050752143518665905311311986258635963723328477106,
             'v': 0}
-        >>> w3.eth.sendRawTransaction(signed.rawTransaction)
+        >>> w3.cfx.sendRawTransaction(signed.rawTransaction)
         """
         if not isinstance(transaction_dict, Mapping):
             raise TypeError("transaction_dict must be dict-like, got %r" % transaction_dict)
@@ -273,6 +273,13 @@ class Account(EthAccount):
 
     @staticmethod
     def decrypt(keyfile_json: Union[Dict[str, Any], str, KeyfileDict], password: str) -> HexBytes:
+        """
+        Decrypts a keyfile and returns the secret key.
+
+        :param Union[Dict[str, Any], str, KeyfileDict] keyfile_json: The encrypted key
+        :param str password: The password that was used to encrypt the key
+        :return HexBytes: the hex private key
+        """        
         return EthAccount.decrypt(keyfile_json, password)
 
     @combomethod
