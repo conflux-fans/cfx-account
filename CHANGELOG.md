@@ -1,5 +1,11 @@
 # changelog
 
+## 1.0.1
+
+* fix: wrong object class returned by from_mnemonic
+* feat: support `create_with_mnemonic`
+* feat: `create` support `network_id` parameter
+
 ## 1.0.0
 
 * stable release
