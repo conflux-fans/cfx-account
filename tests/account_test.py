@@ -12,6 +12,7 @@ from cfx_utils.types import (
 from hexbytes import (
     HexBytes,
 )
+from conflux_web3.dev import get_testnet_web3
 
 key = '0xcc7939276283a32f60d2fad7d16cac972300308fe99ec98d0e63765d02e24863'
 address = '0x1b981f81568eDD843DcB5b407ff0DD2e25618622'
@@ -89,6 +90,10 @@ def test_local_account():
     local_account.network_id = None
     assert local_account.address == address
 
-# TODO: finish the test after python-conflux-sdk's beta release
-# def test_set_w3():
-#     pass
+def test_set_network_id():
+    assert Account.create().address.startswith("0x")
+    assert Account.create(network_id=1029).network_id == 1029
+    w3 = get_testnet_web3()
+    Account.set_w3(w3)
+    assert Account.create().network_id == 1
+    Account.set_w3(None) # type: ignore

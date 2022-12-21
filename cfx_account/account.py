@@ -31,9 +31,6 @@ from eth_account.datastructures import (
 from eth_account.messages import (
     SignableMessage,
 )
-from cfx_address.utils import (
-    validate_network_id
-)
 from cfx_account.signers.local import (
     LocalAccount
 )
@@ -126,13 +123,14 @@ class Account(EthAccount):
         # but without the private key argument
         """
         key = self._parsePrivateKey(private_key)
-        if network_id is not None:
-            validate_network_id(network_id)
-            return LocalAccount(key, self, network_id)
-        if self.w3:
-            w3_network_id = self.w3.cfx.chain_id
-            return LocalAccount(key, self, w3_network_id)
-        return LocalAccount(key, self)
+        return LocalAccount(
+            key,
+            self,
+            # use network_id is it is not None
+            # then use None if self.w3 is not set
+            # if self.w3 is set, use self.w3.cfx.chain_id
+            network_id or (self.w3 and self.w3.cfx.chain_id)
+        )
 
     @combomethod
     def sign_transaction(
@@ -299,8 +297,27 @@ class Account(EthAccount):
         return to_checksum_address(eth_eoa_address_to_cfx_hex(recovered_address))
 
     @combomethod
-    def create(self, extra_entropy: str='') -> LocalAccount:
-        return super().create(extra_entropy)
+    def create(self, extra_entropy: str='', network_id: Optional[int]=None) -> LocalAccount:
+        """
+        Creates a new private key, and returns it as a :class:`~cfx_account.local.LocalAccount`.
+
+        :param str extra_entropy: Add extra randomness to the randomness provided by your OS, defaults to ''
+        :param Optional[int] network_id: the network id of the generated account, which determines the address encoding, defaults to None
+        :return LocalAccount: an object with private key and convenience methods
+        
+        :examples:
+        
+        >>> from cfx_account import Account
+        >>> acct = Account.create()
+        >>> acct.address
+        '0x187EE3Cb948fFb5a34417344f7fA01c638aa2F96'
+        >>> Account.create(network_id=1029).address
+        'cfx:aapapvutg83zauuexwdrgjp4v6xm3dkbm2vevh1rub'
+        """        
+        acct: LocalAccount = super().create(extra_entropy)
+        if network_id is not None:
+            acct.network_id = network_id
+        return acct
     
     @combomethod
     def sign_message(self,
