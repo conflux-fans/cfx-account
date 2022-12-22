@@ -39,10 +39,32 @@ class LocalAccount(EthLocalAccount):
 
     @property
     def network_id(self) -> Union[int, None]:
+        """
+        The network id of the account, which determines its address.
+        Can be set using a positive int or None
+
+        :return Union[int, None]: the network id of the account, 1029 for mainnet and 1 for testnet
+        
+        :examples:
+        
+        >>> from cfx_account import Account
+        >>> acct = Account.create()
+        >>> assert acct.network_id is None
+        >>> acct.address
+        '0x1261D876E5C589Bc26248c53C68b71c2d28470e9'  
+        >>> acct.network_id = 1
+        >>> acct.address
+        'cfxtest:aakgd0d061c2xtbgewgfhvynshbrfbdu7e55kdxfxx'
+        """        
         return self._network_id
     
     @network_id.setter
     def network_id(self, new_network_id: Union[int, None]) -> None:
+        """
+        Set the network id of the account, which determines its address
+
+        :param Union[int, None] new_network_id: the new network id
+        """        
         if new_network_id is not None:
             validate_network_id(new_network_id)
         self._network_id = new_network_id
@@ -53,9 +75,10 @@ class LocalAccount(EthLocalAccount):
     @property
     def address(self) -> Union[Base32Address, ChecksumAddress]:
         """
-        returns the address of the account
+        Returns the address of the account.
 
-        :return Union[Base32Address, ChecksumAddress]: _description_
+        :return Union[Base32Address,ChecksumAddress]: Returns a Base32Address if network id is not None, 
+            else ChecksumAddress
         """
         hex_address = self.hex_address
         if not self._network_id:
@@ -64,6 +87,11 @@ class LocalAccount(EthLocalAccount):
 
     @property
     def hex_address(self) -> ChecksumAddress:
+        """
+        Returns the hex address of the account.
+
+        :return ChecksumAddress: the hex address in checksum format
+        """        
         return to_checksum_address(eth_eoa_address_to_cfx_hex(super().address))
     
     @property
@@ -74,16 +102,34 @@ class LocalAccount(EthLocalAccount):
         return super().key
     
     def get_base32_address(self, specific_network_id: int) -> Base32Address:
+        """
+        Returns the Base32Address of the account in specific network
+        without changing the account network id
+
+        :param int specific_network_id: the network id of the target network
+        :return Base32Address:
+        """        
         return Base32Address(self.address, specific_network_id)
     
-    # add type hint
     def sign_transaction(self, transaction_dict: TxParam) -> SignedTransaction:
+        """
+        This uses the same structure as in
+        :meth:`~cfx_account.account.Account.sign_transaction`, but without a private key argument.
+        """
         return super().sign_transaction(transaction_dict)
     
     def sign_message(self, signable_message: SignableMessage) -> SignedMessage:
+        """
+        This uses the same structure as in
+        :meth:`~cfx_account.account.Account.sign_message`, but without a private key argument.
+        """
         return super().sign_message(signable_message)
     
     def encrypt(self, password: str, kdf: Optional[Literal['scrypt', 'pbkdf2']]=None, iterations: Optional[int]=None) -> KeyfileDict:
+        """
+        This uses the same structure as in
+        :meth:`~cfx_account.account.Account.encrypt`, but without a private key argument.
+        """
         return super().encrypt(password, kdf, iterations)
     
     def __bytes__(self) -> bytes:
