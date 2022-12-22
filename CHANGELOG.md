@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.2
+
+* fix: wrong testcase for `encode_structured_data`
+* doc: add and improve docstrings of cfx_account.account and cfx_account.signers.local
+
 ## 1.0.1
 
 * fix: wrong object class returned by from_mnemonic
