@@ -29,7 +29,7 @@ def test_sign_message():
     assert address == acct.address
 
 def test_sign_structured_data():
-    encoded_data = encode_defunct(text=message)
+    encoded_data = encode_structured_data(typed_data)
     acct = Account.from_key(private_key)
     signed = acct.sign_message(encoded_data)
     address = Account.recover_message(encoded_data, signature=signed.signature)
