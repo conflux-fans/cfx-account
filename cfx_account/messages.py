@@ -41,9 +41,9 @@ def encode_structured_data(
     hexstr: Optional[str] = None,
     text: Optional[str] = None) -> SignableMessage:
     """
-    Encode an EIP-712_ message.
+    Encode an CIP-23_ message.
 
-    EIP-712 is the "structured data" approach (ie~ version 1 of an EIP-191 message).
+    CIP-23 is the "structured data" approach.
 
     Supply the message as exactly one of the three arguments:
 
@@ -52,17 +52,13 @@ def encode_structured_data(
         - text, as a json-encoded string
         - hexstr, as a hex-encoded (json-encoded) string
 
-    .. WARNING:: Note that this code has not gone through an external audit, and
-        the test cases are incomplete.
-        Also, watch for updates to the format, as the EIP is still in DRAFT.
-
     :param primitive: the binary message to be signed
     :type primitive: bytes or int or Mapping (eg~ dict )
     :param hexstr: the message encoded as hex
     :param text: the message as a series of unicode characters (a normal Py3 str)
-    :returns: The EIP-191 encoded message, ready for signing
+    :returns: The CIP-23 encoded message for typed data, ready for signing
 
-    .. _EIP-712: https://eips.ethereum.org/EIPS/eip-712
+    .. _CIP-23: https://github.com/Conflux-Chain/CIPs/blob/master/CIPs/cip-23.md
     """
     if isinstance(primitive, Mapping):
         validate_structured_data(cast(Dict[str, Any], primitive))
@@ -87,12 +83,15 @@ def encode_defunct(
     :type primitive: bytes or int
     :param str hexstr: the message encoded as hex
     :param str text: the message as a series of unicode characters (a normal Py3 str)
-    :returns: The EIP-191 encoded message, ready for signing
+    :returns: The CIP-23 encoded message for a string, ready for signing
     """
     message_bytes = to_bytes(primitive, hexstr=hexstr, text=text)
     msg_length = str(len(message_bytes)).encode('utf-8')
 
-    # Encoding version E defined by EIP-191
+    # Encoding version E is defined by EIP-191 
+    # "\x19Ethereum Signed Message:\n" + len(message).
+    # There is not a similar definition in CIP-23, so we use C as version to compute, 
+    # in which way the computing result is right
     return SignableMessage(
         b'C',
         b'onflux Signed Message:\n' + msg_length,
