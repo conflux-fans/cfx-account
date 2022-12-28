@@ -9,7 +9,7 @@ from cfx_account.messages import encode_structured_data, encode_defunct
 
 private_key = "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 typed_data = json.load(open("tests/typed-data.json"))
-typed_data_without_chainId = json.load(open("tests/typed-data-without-chainId.json"))
+typed_data_without_chainId = json.load(open("tests/typed-data-without-chainid.json"))
 message = "Hello World"
 
 # signature from js-conflux-sdk
