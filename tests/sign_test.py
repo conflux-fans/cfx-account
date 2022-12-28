@@ -1,10 +1,15 @@
-import json
+import json, pytest
 from hexbytes import HexBytes
+
+from eth_utils.exceptions import (
+    ValidationError,
+)
 from cfx_account import Account
 from cfx_account.messages import encode_structured_data, encode_defunct
 
 private_key = "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 typed_data = json.load(open("tests/typed-data.json"))
+typed_data_without_chainId = json.load(open("tests/typed-data-without-chainId.json"))
 message = "Hello World"
 
 # signature from js-conflux-sdk
@@ -34,3 +39,7 @@ def test_sign_structured_data():
     signed = acct.sign_message(encoded_data)
     address = Account.recover_message(encoded_data, signature=signed.signature)
     assert address == acct.address
+
+def test_sign_structured_data_without_chainId():
+    with pytest.raises(ValidationError):
+        encode_structured_data(typed_data_without_chainId)

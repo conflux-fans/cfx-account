@@ -8,7 +8,6 @@ from eth_utils.exceptions import (
 )
 from eth_account._utils.structured_data.validation import (
     used_header_fields,
-    EIP712_DOMAIN_FIELDS,
     validate_types_attribute,
     validate_primaryType_attribute,
     validate_has_attribute,
@@ -23,8 +22,9 @@ def validate_CIP23Domain_schema(structured_data: Dict[str, Any]):
     # and they are declared only once (if defined at all)
     CIP23Domain_data = structured_data["types"]["CIP23Domain"]
     header_fields = used_header_fields(CIP23Domain_data)
-    if len(header_fields) == 0:
-        raise ValidationError(f"One of {EIP712_DOMAIN_FIELDS} must be defined in {structured_data}")
+    # CIP-23 requires `chainId` field
+    if "chainId" not in header_fields:
+        raise ValidationError(f"Field 'chainId' must be defined in {structured_data}")
     for field in header_fields:
         validate_field_declared_only_once_in_struct(field, CIP23Domain_data, "CIP23Domain")
 
