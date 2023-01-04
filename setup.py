@@ -6,6 +6,7 @@ LONG_DESCRIPTION = 'Conflux account that can sign a conflux transaction'
 extras_require = {
     'tester': [
         "pytest>=6.2.5,<7",
+        "conflux-web3[ipfs]>=1.0.0",
     ],
     'linter': [
         # "black>=22.1.0,<23.0",
@@ -35,7 +36,6 @@ extras_require = {
     'dev': [
         # "bumpversion",
         "wheel",
-        "conflux-web3>=1.0.0",
         # "flaky>=3.7.0,<4",
         # "hypothesis>=3.31.2,<6",
         # "pytest>=6.2.5,<7",
