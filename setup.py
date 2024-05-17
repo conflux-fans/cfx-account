@@ -70,7 +70,7 @@ setup(
     packages=find_packages(),
     package_data={'cfx_account': ['py.typed']},
     install_requires=[
-        "eth-account>=0.5.9",
+        "0.11.0>eth-account>=0.5.9",
         "cfx-address>=1.0.0",
         "cfx-utils>=1.0.0"
     ],  # add any additional packages that
