@@ -1,5 +1,9 @@
 # changelog
 
+## 1.0.4
+
+* fix: restrict `eth-account` version
+
 ## 1.0.3
 
 * fix: `encode_structured_data` not checking `chainId` existence in `CIP23Domain`
