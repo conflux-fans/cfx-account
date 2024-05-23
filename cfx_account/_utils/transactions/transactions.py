@@ -66,8 +66,11 @@ class Transaction:
     @classmethod
     def from_bytes(cls, encoded_transaction: HexBytes) -> "Transaction":
         """Builds a TypedTransaction from a signed encoded transaction."""
-        # if not isinstance(encoded_transaction, HexBytes):
-        #     raise TypeError(f"expected Hexbytes, got {type(encoded_transaction)}")
+        
+        if not isinstance(encoded_transaction, HexBytes):
+            raise TypeError(f"expected Hexbytes, got {type(encoded_transaction)}")
+        return LegacyTransaction.from_bytes(encoded_transaction)
+        
         # if not (len(encoded_transaction) > 0 and encoded_transaction[0] <= 0x7F):
         #     raise ValueError("unexpected input")
 

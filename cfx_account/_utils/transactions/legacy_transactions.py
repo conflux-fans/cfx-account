@@ -11,18 +11,14 @@ from eth_account._utils.legacy_transactions import TRANSACTION_DEFAULTS
 from eth_account._utils.validation import is_int_or_prefixed_hexstr, is_none
 from eth_rlp import HashableRLP
 from eth_utils.conversions import to_bytes, to_int
-from eth_utils.curried import (
-    apply_formatters_to_dict,
-    apply_one_of_formatters,
-    hexstr_if_str,
-)
+from eth_utils.curried import (apply_formatters_to_dict,
+                               apply_one_of_formatters, hexstr_if_str)
 from eth_utils.types import is_bytes, is_string
+from hexbytes import HexBytes
 from rlp.sedes import Binary, big_endian_int, binary
 
 from cfx_account._utils.transactions.transaction_utils import (
-    hexstr_if_base32,
-    is_empty_or_valid_base32_address,
-)
+    hexstr_if_base32, is_empty_or_valid_base32_address)
 
 from .base import TransactionImplementation  # type: ignore
 
@@ -60,16 +56,30 @@ class LegacyTransaction(TransactionImplementation):
     transaction_type: ClassVar[int] = 0
 
     def __init__(self, tx_dict: TxDict):
+        if "type" in tx_dict:
+            tx_dict.pop("type")  # type: ignore
+
+        # signed
         if "v" in tx_dict:
             self.ImplType = LegacyTransactionImpl
+            chain_naive_transaction = dissoc(tx_dict, "v", "r", "s")
+            self.impl = LegacyTransactionImpl(
+                tx_meta=UnsignedLegacyTransactionImpl(**chain_naive_transaction),
+                v=tx_dict["v"],
+                r=tx_dict["r"],
+                s=tx_dict["s"],
+            )
             # self.impl = LegacyTransaction(tx_dict)
-            raise NotImplementedError
-        tx_dict.pop("type") # type: ignore
-        self.ImplType = UnsignedLegacyTransactionImpl
-        self.impl: HashableRLP = serializable_unsigned_transaction_from_dict(tx_dict)
+        else:
+            # Unsigned
+            self.ImplType = UnsignedLegacyTransactionImpl
+            self.impl = serializable_unsigned_transaction_from_dict(tx_dict)
 
     def hash(self) -> bytes:
-        return self.impl.hash()
+        if self.ImplType is UnsignedLegacyTransactionImpl:
+            return self.impl.hash()
+        else:
+            return self.impl[0].hash()
 
     def payload(self) -> bytes:
         raise NotImplementedError
@@ -80,26 +90,23 @@ class LegacyTransaction(TransactionImplementation):
         else:
             vrs = self.vrs()
             return {
-                **self.impl.as_dict()[0].as_dict(), # type: ignore
+                **self.impl.as_dict()[0].as_dict(),  # type: ignore
                 "v": vrs[0],
                 "r": vrs[1],
                 "s": vrs[2],
             }  # type: ignore
-            
+
     def append_signature(self, *, v: int, r: int, s: int) -> "LegacyTransaction":
         if self.is_signed():
             raise ValueError("Transaction is already signed")
         else:
             self.ImplType = LegacyTransactionImpl
-            self.impl = LegacyTransactionImpl(
-                tx_meta=self.impl,
-                v=v,r=r,s=s
-            )
+            self.impl = LegacyTransactionImpl(tx_meta=self.impl, v=v, r=r, s=s)
         return self
-            
+
     def is_signed(self) -> bool:
         return self.ImplType is LegacyTransactionImpl
-    
+
     def encode(self) -> bytes:
         if not self.is_signed():
             raise ValueError("Transaction is not signed")
@@ -111,6 +118,20 @@ class LegacyTransaction(TransactionImplementation):
             return vrs_from(self.impl)
         else:
             raise ValueError("Unsigned transaction does not have vrs")
+
+    @classmethod
+    def from_bytes(cls, encoded_transaction: HexBytes) -> "LegacyTransaction":
+        impl: LegacyTransactionImpl = LegacyTransactionImpl.from_bytes(
+            encoded_transaction
+        )
+        return LegacyTransaction(
+            {
+                **impl[0].as_dict(),
+                "v": impl.v,
+                "r": impl.r,
+                "s": impl.s,
+            }
+        )
 
 
 def serializable_unsigned_transaction_from_dict(
