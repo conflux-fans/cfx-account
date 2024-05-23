@@ -8,9 +8,7 @@ from typing import (
     Tuple,
     TypeVar,
 )
-from typing_extensions import (
-    Literal
-)
+from typing_extensions import Literal
 from eth_keys import (
     keys,
 )
@@ -31,9 +29,7 @@ from eth_account.datastructures import (
 from eth_account.messages import (
     SignableMessage,
 )
-from cfx_account.signers.local import (
-    LocalAccount
-)
+from cfx_account.signers.local import LocalAccount
 from eth_utils.crypto import (
     keccak,
 )
@@ -41,14 +37,12 @@ from collections.abc import (
     Mapping,
 )
 from cytoolz import (
-    dissoc, # type: ignore
+    dissoc,  # type: ignore
 )
 from hexbytes import (
     HexBytes,
 )
-from eth_utils.address import (
-    to_checksum_address
-)
+from eth_utils.address import to_checksum_address
 from eth_account.datastructures import (
     # SignedMessage,
     SignedTransaction,
@@ -57,8 +51,7 @@ from cfx_account._utils.signing import (
     sign_transaction_dict,
 )
 from cfx_account._utils.transactions.legacy_transactions import (
-    LegacyTransactionImpl,
-    vrs_from,
+    LegacyTransaction,
 )
 from cfx_address import (
     Base32Address,
@@ -84,25 +77,28 @@ if TYPE_CHECKING:
     from conflux_web3 import Web3
 
 CONFLUX_DEFAULT_PATH = "m/44'/503'/0'/0/0"
-VRS = TypeVar('VRS', bytes, HexStr, int)
+VRS = TypeVar("VRS", bytes, HexStr, int)
+
 
 class Account(EthAccount):
-    
+
     # _default_network_id: Optional[int]=None
-    w3: Optional["Web3"] = None 
-    
+    w3: Optional["Web3"] = None
+
     _use_unaudited_hdwallet_features = True
-    
+
     @combomethod
     def set_w3(self, w3: "Web3") -> None:
         self.w3 = w3
-    
+
     # def set_default_network_id(self, network_id: int):
     #     self._default_network_id = network_id
 
     @combomethod
     def from_key(
-        self, private_key: Union[bytes, str, PrivateKey], network_id: Optional[int]=None
+        self,
+        private_key: Union[bytes, str, PrivateKey],
+        network_id: Optional[int] = None,
     ) -> LocalAccount:
         """
         returns a LocalAccount object
@@ -129,7 +125,7 @@ class Account(EthAccount):
             # use network_id is it is not None
             # then use None if self.w3 is not set
             # if self.w3 is set, use self.w3.cfx.chain_id
-            network_id or (self.w3 and self.w3.cfx.chain_id)
+            network_id or (self.w3 and self.w3.cfx.chain_id),
         )
 
     @combomethod
@@ -152,7 +148,7 @@ class Account(EthAccount):
         :raises ValueError: transaction's from field does not match private_key
         :return SignedTransaction: an attribute dict contains various details about the signature - most
           importantly the fields: v, r, and s
-    
+
         >>> transaction = {
                 # Note that the address must be in Base32 format or native bytes:
                 'to': 'cfxtest:aak7fsws4u4yf38fk870218p1h3gxut3ku00u1k1da',
@@ -174,19 +170,25 @@ class Account(EthAccount):
         >>> w3.cfx.sendRawTransaction(signed.rawTransaction)
         """
         if not isinstance(transaction_dict, Mapping):
-            raise TypeError("transaction_dict must be dict-like, got %r" % transaction_dict)
+            raise TypeError(
+                "transaction_dict must be dict-like, got %r" % transaction_dict
+            )
 
         account: LocalAccount = self.from_key(private_key)
         transaction_dict = cast(TxDict, transaction_dict)
         # allow from field, *only* if it matches the private key
-        if 'from' in transaction_dict:
-            if normalize_to(transaction_dict['from'], None) == normalize_to(account.address, None):
-                sanitized_transaction = cast(TxDict, dissoc(transaction_dict, 'from'))
+        if "from" in transaction_dict:
+            if normalize_to(transaction_dict["from"], None) == normalize_to(
+                account.address, None
+            ):
+                sanitized_transaction = cast(TxDict, dissoc(transaction_dict, "from"))
             else:
-                raise ValueError("transaction[from] does match key's hex address: "
+                raise ValueError(
+                    "transaction[from] does match key's hex address: "
                     f"from's hex address is {Base32Address(transaction_dict['from']).hex_address}, "
-                    f"key's hex address is {account.hex_address}")
-                
+                    f"key's hex address is {account.hex_address}"
+                )
+
         else:
             sanitized_transaction = transaction_dict
 
@@ -196,7 +198,9 @@ class Account(EthAccount):
             r,
             s,
             raw_transaction,
-        ) = sign_transaction_dict(account._key_obj, sanitized_transaction) # type: ignore
+        ) = sign_transaction_dict(
+            account._key_obj, sanitized_transaction
+        )  # type: ignore
 
         transaction_hash = keccak(raw_transaction)
 
@@ -209,11 +213,13 @@ class Account(EthAccount):
         )
 
     @combomethod
-    def from_mnemonic(self,
-                      mnemonic: str,
-                      passphrase: str = "",
-                      account_path: str = CONFLUX_DEFAULT_PATH,
-                      network_id: Optional[int] = None) -> LocalAccount:
+    def from_mnemonic(
+        self,
+        mnemonic: str,
+        passphrase: str = "",
+        account_path: str = CONFLUX_DEFAULT_PATH,
+        network_id: Optional[int] = None,
+    ) -> LocalAccount:
         """
         Generate an account from a mnemonic.
 
@@ -223,14 +229,14 @@ class Account(EthAccount):
             BIP32 HD wallet key derivation, defaults to CONFLUX_DEFAULT_PATH(m/44'/503'/0'/0/0)
         :param Optional[int] network_id: the network id of returned account, defaults to None
         :return LocalAccount: a LocalAccount object
-        
+
         :examples:
-        
+
         >>> from cfx_account import Account
         >>> acct = Account.from_mnemonic('faint also eye industry survey unhappy boil public lemon myself cube sense', network_id=1)
         >>> acct.address
         'cfxtest:aargrnff46pmuy2g1mmrntctkhr5mzamh6nmg361n0'
-        """        
+        """
         # acct: LocalAccount = super().from_mnemonic(mnemonic, passphrase, account_path)
         seed = seed_from_mnemonic(mnemonic, passphrase)
         private_key = key_from_seed(seed, account_path)
@@ -238,12 +244,14 @@ class Account(EthAccount):
         return LocalAccount(key, self, network_id or (self.w3 and self.w3.cfx.chain_id))
 
     @combomethod
-    def create_with_mnemonic(self,
-                             passphrase: str = "",
-                             num_words: int = 12,
-                             language: str = "english",
-                             account_path: str = CONFLUX_DEFAULT_PATH,
-                             network_id: Optional[int] = None) -> Tuple[LocalAccount, str]:
+    def create_with_mnemonic(
+        self,
+        passphrase: str = "",
+        num_words: int = 12,
+        language: str = "english",
+        account_path: str = CONFLUX_DEFAULT_PATH,
+        network_id: Optional[int] = None,
+    ) -> Tuple[LocalAccount, str]:
         """
         Create mnemonic and derive an account using parameters
 
@@ -254,42 +262,48 @@ class Account(EthAccount):
         :param str account_path: Specify an alternate HD path for deriving the seed using
             BIP32 HD wallet key derivation, defaults to CONFLUX_DEFAULT_PATH(m/44'/503'/0'/0/0)
         :param Optional[int] network_id: the network id of returned account, defaults to None
-        :return Tuple[LocalAccount, str]: a LocalAccount object and related mnemonic 
-        """        
-        acct, mnemonic = super().create_with_mnemonic(passphrase, num_words, language, account_path)
+        :return Tuple[LocalAccount, str]: a LocalAccount object and related mnemonic
+        """
+        acct, mnemonic = super().create_with_mnemonic(
+            passphrase, num_words, language, account_path
+        )
         if network_id is not None:
             acct.network_id = network_id
         return acct, mnemonic
 
     @classmethod
-    def encrypt( # type: ignore
+    def encrypt(  # type: ignore
         cls,
         private_key: Union[bytes, str, PrivateKey],
         password: str,
-        kdf: Optional[Literal["scrypt", "pbkdf2"]]=None,
-        iterations: Optional[int] = None
+        kdf: Optional[Literal["scrypt", "pbkdf2"]] = None,
+        iterations: Optional[int] = None,
     ) -> KeyfileDict:
-        return super().encrypt(private_key, password, kdf, iterations) # type: ignore
+        return super().encrypt(private_key, password, kdf, iterations)  # type: ignore
 
     @staticmethod
-    def decrypt(keyfile_json: Union[Dict[str, Any], str, KeyfileDict], password: str) -> HexBytes:          
+    def decrypt(
+        keyfile_json: Union[Dict[str, Any], str, KeyfileDict], password: str
+    ) -> HexBytes:
         """
         Decrypts a keyfile and returns the secret key.
 
         :param Union[Dict[str,Any],str,KeyfileDict] keyfile_json: encrypted keyfile
         :param str password: the password that was used to encrypt the key
         :return HexBytes: the hex private key
-        """        
+        """
         return EthAccount.decrypt(keyfile_json, password)
 
     @combomethod
-    def recover_transaction(self, serialized_transaction: Union[bytes, HexStr, str]) -> ChecksumAddress:
+    def recover_transaction(
+        self, serialized_transaction: Union[bytes, HexStr, str]
+    ) -> ChecksumAddress:
         """
         Get the address of the account that signed this transaction.
 
         :param Union[bytes,HexStr,str] serialized_transaction: the complete signed transaction
         :return ChecksumAddress: address of signer, hex-encoded & checksummed
-        
+
         :example:
 
         >>> raw_transaction = '0xf86a8086d55698372431831e848094f0109fc8df283027b6285cc889f5aa624eac1f55843b9aca008025a009ebb6ca057a0535d6186462bc0b465b561c94a295bdb0621fc19208ab149a9ca0440ffd775ce91a833ab410777204d5341a6f9fa91216a6f3ee2c051fea6a0428'  # noqa: E501
@@ -298,46 +312,50 @@ class Account(EthAccount):
         """
         txn_bytes = HexBytes(serialized_transaction)
         # TODO: replace with Transaction.from_bytes()
-        txn = LegacyTransactionImpl.from_bytes(txn_bytes)
-        recovered_address = self._recover_hash(txn[0].hash(), vrs=vrs_from(txn)) # type: ignore
+        txn = LegacyTransaction.from_bytes(txn_bytes)
+        recovered_address = self._recover_hash(txn.hash(), vrs=txn.vrs())  # type: ignore
         return to_checksum_address(eth_eoa_address_to_cfx_hex(recovered_address))
 
     @combomethod
-    def create(self, extra_entropy: str='', network_id: Optional[int]=None) -> LocalAccount:
+    def create(
+        self, extra_entropy: str = "", network_id: Optional[int] = None
+    ) -> LocalAccount:
         """
         Creates a new private key, and returns it as a :class:`~cfx_account.signers.local.LocalAccount`.
 
         :param str extra_entropy: Add extra randomness to the randomness provided by your OS, defaults to ''
         :param Optional[int] network_id: the network id of the generated account, which determines the address encoding, defaults to None
         :return LocalAccount: an object with private key and convenience methods
-        
+
         :examples:
-        
+
         >>> from cfx_account import Account
         >>> acct = Account.create()
         >>> acct.address
         '0x187EE3Cb948fFb5a34417344f7fA01c638aa2F96'
         >>> Account.create(network_id=1029).address
         'cfx:aapapvutg83zauuexwdrgjp4v6xm3dkbm2vevh1rub'
-        """        
+        """
         acct: LocalAccount = super().create(extra_entropy)
         if network_id is not None:
             acct.network_id = network_id
         return acct
-    
+
     @combomethod
-    def sign_message(self,
-                     signable_message: SignableMessage,
-                     private_key: Union[bytes, HexStr, int, keys.PrivateKey]) -> SignedMessage:
+    def sign_message(
+        self,
+        signable_message: SignableMessage,
+        private_key: Union[bytes, HexStr, int, keys.PrivateKey],
+    ) -> SignedMessage:
         """
         Sign the provided encoded message. The message is encoded according to CIP-23_
 
         :param SignableMessage signable_message: an encoded message generated by `encode_defunct` or `encode_structured_data`
         :param Union[bytes,HexStr,int,keys.PrivateKey] private_key: the private key used to sign message
         :return SignedMessage: a signed message object
-        
+
         :examples:
-        
+
         >>> from from cfx_account import Account
         >>> from cfx_account.messages import encode_structured_data, encode_defunct
         >>> encoded_message = encode_defunct(text=message)
@@ -348,22 +366,24 @@ class Account(EthAccount):
         >>> assert acct.hex_address == Account.recover_message(encoded_message, signature=signed.signature)
 
         >>> # https://github.com/Conflux-Chain/CIPs/blob/master/CIPs/cip-23.md#typed-data
-        >>> typed_data = { "types": { "CIP23Domain": [ ... ] }, ... } 
+        >>> typed_data = { "types": { "CIP23Domain": [ ... ] }, ... }
         >>> encoded_data = encode_structured_data(typed_data)
         >>> signed = acct.sign_message(encoded_data)
         >>> signed.signature
         '0xd7fb6dca3b084ae3a9bf1ea3527de7a9bc2bd40e0c38d3faf9da214f1d5637ab2944a8a993dc59365c1e74e18a1589b358e3fb81bd03892d159f221e8ac765c701'
         >>> assert acct.hex_address == Account.recover_message(encoded_data, signature=signed.signature)
-        
+
         .. _CIP-23: https://github.com/Conflux-Chain/CIPs/blob/master/CIPs/cip-23.md
-        """        
+        """
         return super().sign_message(signable_message, private_key)
-        
+
     @combomethod
-    def recover_message(self,
-                        signable_message: SignableMessage,
-                        vrs: Optional[Tuple[VRS, VRS, VRS]] = None,
-                        signature: Optional[bytes] = None) -> ChecksumAddress:
+    def recover_message(
+        self,
+        signable_message: SignableMessage,
+        vrs: Optional[Tuple[VRS, VRS, VRS]] = None,
+        signature: Optional[bytes] = None,
+    ) -> ChecksumAddress:
         """
         Get the address of the account that signed the given message.
         Must specify exactly one of vrs or signature.
@@ -373,6 +393,6 @@ class Account(EthAccount):
         :param Optional[Tuple[VRS,VRS,VRS]] vrs: the three pieces generated by an elliptic curve signature, defaults to None
         :param Optional[bytes] signature: signature bytes concatenated as r+s+v, defaults to None
         :return ChecksumAddress: the checksum address of the account that signed the given message
-        """        
+        """
         recovered_address = super().recover_message(signable_message, vrs, signature)
         return to_checksum_address(eth_eoa_address_to_cfx_hex(recovered_address))
