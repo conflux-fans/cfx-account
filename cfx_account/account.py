@@ -56,8 +56,8 @@ from eth_account.datastructures import (
 from cfx_account._utils.signing import (
     sign_transaction_dict,
 )
-from cfx_account._utils.transactions import (
-    Transaction,
+from cfx_account._utils.transactions.legacy_transactions import (
+    LegacyTransactionImpl,
     vrs_from,
 )
 from cfx_address import (
@@ -195,13 +195,13 @@ class Account(EthAccount):
             v,
             r,
             s,
-            rlp_encoded,
+            raw_transaction,
         ) = sign_transaction_dict(account._key_obj, sanitized_transaction) # type: ignore
 
-        transaction_hash = keccak(rlp_encoded)
+        transaction_hash = keccak(raw_transaction)
 
         return SignedTransaction(
-            rawTransaction=HexBytes(rlp_encoded),
+            rawTransaction=HexBytes(raw_transaction),
             hash=HexBytes(transaction_hash),
             r=r,
             s=s,
@@ -297,7 +297,8 @@ class Account(EthAccount):
         '0x1c7536e3605d9c16a7a3d7b1898e529396a65c23'
         """
         txn_bytes = HexBytes(serialized_transaction)
-        txn = Transaction.from_bytes(txn_bytes)
+        # TODO: replace with Transaction.from_bytes()
+        txn = LegacyTransactionImpl.from_bytes(txn_bytes)
         recovered_address = self._recover_hash(txn[0].hash(), vrs=vrs_from(txn)) # type: ignore
         return to_checksum_address(eth_eoa_address_to_cfx_hex(recovered_address))
 
