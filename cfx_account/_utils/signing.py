@@ -1,7 +1,7 @@
 from typing import (
     Tuple,
 )
-from cfx_utils.types import TxDict
+from cfx_utils.types import TxParam
 from eth_keys.datatypes import PrivateKey
 
 from cfx_utils.token_unit import (
@@ -14,7 +14,7 @@ from .transactions.transactions import (
 
 
 def sign_transaction_dict(
-    eth_key: PrivateKey, transaction_dict: TxDict
+    eth_key: PrivateKey, transaction_dict: TxParam
 ) -> Tuple[int, int, int, bytes]:
     if not transaction_dict.get("gasPrice") is None:
         transaction_dict["gasPrice"] = to_int_if_drip_units(transaction_dict["gasPrice"])  # type: ignore

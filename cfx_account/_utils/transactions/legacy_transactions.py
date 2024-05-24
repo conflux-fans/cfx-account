@@ -1,7 +1,7 @@
-from typing import Any, Callable, ClassVar, Dict, Tuple
+from typing import Any, Callable, ClassVar, Dict, Tuple, cast
 
 import rlp
-from cfx_utils.types import TxDict
+from cfx_utils.types import TxParam
 from cytoolz import dissoc  # type: ignore
 from cytoolz import merge  # type: ignore
 from cytoolz import pipe  # type: ignore
@@ -9,12 +9,15 @@ from cytoolz import partial
 from eth_account._utils.legacy_transactions import TRANSACTION_DEFAULTS
 from eth_account._utils.validation import is_int_or_prefixed_hexstr
 from eth_rlp import HashableRLP
-from eth_utils.curried import (apply_formatters_to_dict)
+from eth_utils.curried import apply_formatters_to_dict
 from hexbytes import HexBytes
 from rlp.sedes import Binary, big_endian_int, binary
 
 from cfx_account._utils.transactions.transaction_utils import (
-    LEGACY_TRANSACTION_FORMATTERS, hexstr_if_base32, is_empty_or_valid_base32_address)
+    LEGACY_TRANSACTION_FORMATTERS,
+    hexstr_if_base32,
+    is_empty_or_valid_base32_address,
+)
 
 from .base import TransactionImplementation  # type: ignore
 
@@ -51,7 +54,7 @@ class LegacyTransaction(TransactionImplementation):
 
     transaction_type: ClassVar[int] = 0
 
-    def __init__(self, tx_dict: TxDict):
+    def __init__(self, tx_dict: TxParam):
         if "type" in tx_dict:
             tx_dict.pop("type")  # type: ignore
 
@@ -75,9 +78,9 @@ class LegacyTransaction(TransactionImplementation):
         if self.ImplType is UnsignedLegacyTransactionImpl:
             return self.impl.hash()
         else:
-            return self.impl[0].hash()
+            return self.impl[0].hash() # type: ignore
 
-    def from_dict(self, tx_dict: TxDict) -> "LegacyTransaction":
+    def from_dict(self, tx_dict: TxParam) -> "LegacyTransaction":
         return LegacyTransaction(tx_dict)
 
     def as_dict(self) -> Dict[str, Any]:
@@ -117,12 +120,12 @@ class LegacyTransaction(TransactionImplementation):
 
     @classmethod
     def from_bytes(cls, encoded_transaction: HexBytes) -> "LegacyTransaction":
-        impl: LegacyTransactionImpl = LegacyTransactionImpl.from_bytes(
-            encoded_transaction
+        impl = cast(
+            LegacyTransactionImpl, LegacyTransactionImpl.from_bytes(encoded_transaction)
         )
         return LegacyTransaction(
             {
-                **impl[0].as_dict(),
+                **impl[0].as_dict(), # type: ignore
                 "v": impl.v,
                 "r": impl.r,
                 "s": impl.s,
@@ -131,7 +134,7 @@ class LegacyTransaction(TransactionImplementation):
 
 
 def serializable_unsigned_transaction_from_dict(
-    transaction_dict: TxDict,
+    transaction_dict: TxParam,
 ) -> UnsignedLegacyTransactionImpl:
     assert_valid_fields(transaction_dict)
     filled_transaction = pipe(
