@@ -1,12 +1,13 @@
-from typing import Any, Dict, Tuple, Type
+from typing import Type
 
+from cfx_utils.types import TxParam
 from hexbytes import HexBytes
 
+from .base import TransactionImplementation
+from .cip1559_transactions import CIP1559Transaction
+from .legacy_transactions import LegacyTransaction
 from .transaction_utils import copy_ensuring_int_transaction_type
 
-from .base import TransactionImplementation
-from .legacy_transactions import LegacyTransaction
-from cfx_utils.types import TxParam
 
 class Transaction:
     """
@@ -20,7 +21,7 @@ class Transaction:
     """
 
     transaction_impl: TransactionImplementation
-    
+
     # def __init__(self, transaction_type: int, transaction: TransactionImplementation):
     #     """Should not be called directly. Use instead the 'from_dict' method."""
     #     if not isinstance(transaction, TransactionImplementation):
@@ -55,10 +56,10 @@ class Transaction:
         transaction: Type[TransactionImplementation]
         if transaction_type == LegacyTransaction.transaction_type:
             transaction = LegacyTransaction
+        elif transaction_type == CIP1559Transaction.transaction_type:
+            transaction = CIP1559Transaction
         # elif transaction_type == AccessListTransaction.transaction_type:
         #     transaction = AccessListTransaction
-        # elif transaction_type == DynamicFeeTransaction.transaction_type:
-        #     transaction = DynamicFeeTransaction
         # elif transaction_type == BlobTransaction.transaction_type:
         #     transaction = BlobTransaction
         else:
@@ -68,11 +69,11 @@ class Transaction:
     @classmethod
     def from_bytes(cls, encoded_transaction: HexBytes) -> "TransactionImplementation":
         """Builds a TypedTransaction from a signed encoded transaction."""
-        
+
         if not isinstance(encoded_transaction, HexBytes):
             raise TypeError(f"expected Hexbytes, got {type(encoded_transaction)}")
         return LegacyTransaction.from_bytes(encoded_transaction)
-        
+
         # if not (len(encoded_transaction) > 0 and encoded_transaction[0] <= 0x7F):
         #     raise ValueError("unexpected input")
 
@@ -106,14 +107,14 @@ class Transaction:
     #     noting this is not the hash of the raw transaction as the signature is not included.
     #     """
     #     return self.unsigned_hash()
-    
+
     # def unsigned_hash(self):
     #     """
     #     Hashes this transaction to prepare it for signing,
     #     noting this is not the hash of the raw transaction as the signature is not included.
     #     """
     #     return self.transaction.hash()
-    
+
     # def append_signature(self, *, v: int, r: int, s: int):
     #     self.transaction.append_signature(v=v, r=r, s=s)
     #     return self
