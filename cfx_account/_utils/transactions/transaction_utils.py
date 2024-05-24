@@ -11,6 +11,7 @@ from eth_utils.curried import (
     hexstr_if_str,
 )
 from eth_utils.types import is_bytes, is_string
+from hexbytes import HexBytes
 from rlp.sedes import BigEndianInt, Binary, CountableList
 from rlp.sedes import List as ListSedesClass
 from toolz import assoc, identity, merge
@@ -23,20 +24,13 @@ def is_empty_or_valid_base32_address(val: Any) -> bool:
         return Base32Address.is_valid_base32(val)
 
 
-def hexstr_if_base32(transaction_dict: TxDict) -> TxDict:
-    to = transaction_dict.get("to", None)
-    if not (to in VALID_EMPTY_ADDRESSES):
-        address = Base32Address(to)  # type: ignore
-        transaction_dict["to"] = address.hex_address
-    return transaction_dict
-
-
 LEGACY_TRANSACTION_FORMATTERS = {
     "nonce": hexstr_if_str(to_int),
     "gasPrice": hexstr_if_str(to_int),
     "gas": hexstr_if_str(to_int),
     "to": apply_one_of_formatters(
         (
+            (Base32Address.is_valid_base32, lambda val: HexBytes(Base32Address(val).hex_address)),  # type: ignore
             (is_string, hexstr_if_str(to_bytes)),
             (is_bytes, identity),
             (is_none, lambda val: b""),  # type: ignore
@@ -84,6 +78,7 @@ access_list_sede_type = CountableList(
         ]
     ),
 )
+
 
 # returns a copy of the transaction dict with the 'type' field converted to int
 def copy_ensuring_int_transaction_type(transaction_dict: TxParam) -> Dict[str, Any]:

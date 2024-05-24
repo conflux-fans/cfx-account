@@ -15,7 +15,6 @@ from rlp.sedes import Binary, big_endian_int, binary
 
 from cfx_account._utils.transactions.transaction_utils import (
     LEGACY_TRANSACTION_FORMATTERS,
-    hexstr_if_base32,
     is_empty_or_valid_base32_address,
 )
 
@@ -141,7 +140,6 @@ def serializable_unsigned_transaction_from_dict(
         transaction_dict,
         dict,
         partial(merge, TRANSACTION_DEFAULTS),
-        hexstr_if_base32,
         apply_formatters_to_dict(LEGACY_TRANSACTION_FORMATTERS),
     )
     serializer = UnsignedLegacyTransactionImpl
