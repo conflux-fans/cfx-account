@@ -101,10 +101,9 @@ class CIP1559Transaction(TransactionImplementation):
         rlp_serializer = self.__class__._unsigned_transaction_serializer
         hash = pipe(
             rlp_serializer.from_dict(rlp_structured_txn_without_sig_fields),  # type: ignore  # noqa: E501
-            lambda val: rlp.encode(val),  # rlp([...])
-            lambda val: HexBytes(b"cfx")
-            + HexBytes("0x02")
-            + HexBytes(val),  # (0x02 || rlp([...]))
+            lambda val: rlp.encode(val),  # type: ignore
+            # (b'cfx' || 0x02 || rlp([...]))
+            lambda val: HexBytes(b"cfx") + HexBytes("0x02") + HexBytes(val),  # type: ignore
             keccak,  # keccak256(0x02 || rlp([...]))
         )
         return hash

@@ -45,7 +45,7 @@ class TransactionImplementation(ABC):
         pass
 
 # returns a copy of the transaction dict with the 'type' field converted to int
-def copy_ensuring_int_transaction_type(transaction_dict: Dict[str, Any]) -> Dict[str, Any]:
+def copy_ensuring_int_transaction_type(transaction_dict: TxParam) -> Dict[str, Any]:
     if "type" not in transaction_dict:
         if "gasPrice" in transaction_dict:
             if "accessList" in transaction_dict:

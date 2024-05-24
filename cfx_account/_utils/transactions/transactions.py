@@ -4,7 +4,7 @@ from hexbytes import HexBytes
 
 from .base import TransactionImplementation, copy_ensuring_int_transaction_type
 from .legacy_transactions import LegacyTransaction
-
+from cfx_utils.types import TxParam
 
 class Transaction:
     """
@@ -39,7 +39,7 @@ class Transaction:
     @classmethod
     def from_dict(
         cls,
-        dictionary: Dict[str, Any],  # blobs: List[bytes] = None
+        dictionary: TxParam,  # blobs: List[bytes] = None
     ) -> "TransactionImplementation":
         """
         Builds a TypedTransaction from a dictionary.
@@ -64,7 +64,7 @@ class Transaction:
         return transaction(dict_copy)
 
     @classmethod
-    def from_bytes(cls, encoded_transaction: HexBytes) -> "Transaction":
+    def from_bytes(cls, encoded_transaction: HexBytes) -> "TransactionImplementation":
         """Builds a TypedTransaction from a signed encoded transaction."""
         
         if not isinstance(encoded_transaction, HexBytes):
