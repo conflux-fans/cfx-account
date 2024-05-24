@@ -8,7 +8,7 @@ cip1559_transaction_dict = {
     "maxPriorityFeePerGas": 100,
     "maxFeePerGas": 100,
     "gas": 100,
-    "to": "0x19578CF3c71eaB48cF810c78B5175d5c9E6Ef441",
+    "to": Base32Address("0x19578CF3c71eaB48cF810c78B5175d5c9E6Ef441", 10),
     "value": 100,
     "data": "Hello, World".encode('utf-8'),
     "storageLimit": 100,
@@ -16,7 +16,7 @@ cip1559_transaction_dict = {
     "chainId": 100,
     "accessList": [
         {
-            "address": "0x19578CF3c71eaB48cF810c78B5175d5c9E6Ef441",
+            "address": Base32Address("0x19578CF3c71eaB48cF810c78B5175d5c9E6Ef441", 10),
             "storageKeys": [
                 "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
             ],

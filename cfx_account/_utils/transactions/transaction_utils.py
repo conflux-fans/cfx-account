@@ -56,6 +56,7 @@ TYPED_TRANSACTION_FORMATTERS = merge(
                 {
                     "address": apply_one_of_formatters(
                         (
+                            (Base32Address.is_valid_base32, lambda val: HexBytes(Base32Address(val).hex_address)),  # type: ignore
                             (is_string, hexstr_if_str(to_bytes)),
                             (is_bytes, identity),
                         )
