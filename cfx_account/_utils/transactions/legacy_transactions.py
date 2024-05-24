@@ -3,26 +3,22 @@ from typing import Any, Callable, ClassVar, Dict, Tuple
 import rlp
 from cfx_utils.types import TxDict
 from cytoolz import dissoc  # type: ignore
-from cytoolz import identity  # type: ignore
 from cytoolz import merge  # type: ignore
 from cytoolz import pipe  # type: ignore
 from cytoolz import partial
 from eth_account._utils.legacy_transactions import TRANSACTION_DEFAULTS
-from eth_account._utils.validation import is_int_or_prefixed_hexstr, is_none
+from eth_account._utils.validation import is_int_or_prefixed_hexstr
 from eth_rlp import HashableRLP
-from eth_utils.conversions import to_bytes, to_int
-from eth_utils.curried import (apply_formatters_to_dict,
-                               apply_one_of_formatters, hexstr_if_str)
-from eth_utils.types import is_bytes, is_string
+from eth_utils.curried import (apply_formatters_to_dict)
 from hexbytes import HexBytes
 from rlp.sedes import Binary, big_endian_int, binary
 
 from cfx_account._utils.transactions.transaction_utils import (
-    hexstr_if_base32, is_empty_or_valid_base32_address)
+    LEGACY_TRANSACTION_FORMATTERS, hexstr_if_base32, is_empty_or_valid_base32_address)
 
 from .base import TransactionImplementation  # type: ignore
 
-UNSIGNED_TRANSACTION_FIELDS = (
+LEGACY_UNSIGNED_TRANSACTION_FIELDS = (
     ("nonce", big_endian_int),
     ("gasPrice", big_endian_int),
     ("gas", big_endian_int),
@@ -36,7 +32,7 @@ UNSIGNED_TRANSACTION_FIELDS = (
 
 
 class UnsignedLegacyTransactionImpl(HashableRLP):
-    fields = UNSIGNED_TRANSACTION_FIELDS
+    fields = LEGACY_UNSIGNED_TRANSACTION_FIELDS
 
 
 class LegacyTransactionImpl(HashableRLP):
@@ -81,8 +77,8 @@ class LegacyTransaction(TransactionImplementation):
         else:
             return self.impl[0].hash()
 
-    def payload(self) -> bytes:
-        raise NotImplementedError
+    def from_dict(self, tx_dict: TxDict) -> "LegacyTransaction":
+        return LegacyTransaction(tx_dict)
 
     def as_dict(self) -> Dict[str, Any]:
         if self.ImplType is UnsignedLegacyTransactionImpl:
@@ -143,7 +139,7 @@ def serializable_unsigned_transaction_from_dict(
         dict,
         partial(merge, TRANSACTION_DEFAULTS),
         hexstr_if_base32,
-        apply_formatters_to_dict(TRANSACTION_FORMATTERS),
+        apply_formatters_to_dict(LEGACY_TRANSACTION_FORMATTERS),
     )
     serializer = UnsignedLegacyTransactionImpl
     return serializer.from_dict(filled_transaction)
@@ -159,27 +155,6 @@ def encode_transaction(
     )
     return rlp.encode(signed_transaction)  # type: ignore
 
-
-TRANSACTION_FORMATTERS = {
-    "nonce": hexstr_if_str(to_int),
-    "gasPrice": hexstr_if_str(to_int),
-    "gas": hexstr_if_str(to_int),
-    "to": apply_one_of_formatters(
-        (
-            (is_string, hexstr_if_str(to_bytes)),
-            (is_bytes, identity),
-            (is_none, lambda val: b""),  # type: ignore
-        )
-    ),
-    "value": hexstr_if_str(to_int),
-    "storageLimit": hexstr_if_str(to_int),
-    "epochHeight": hexstr_if_str(to_int),
-    "chainId": hexstr_if_str(to_int),
-    "data": hexstr_if_str(to_bytes),
-    "v": hexstr_if_str(to_int),
-    "r": hexstr_if_str(to_int),
-    "s": hexstr_if_str(to_int),
-}
 
 TRANSACTION_VALID_VALUES: Dict[str, Callable[[Any], bool]] = {
     "nonce": is_int_or_prefixed_hexstr,

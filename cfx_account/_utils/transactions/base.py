@@ -25,10 +25,6 @@ class TransactionImplementation(ABC):
         pass
 
     @abstractmethod
-    def payload(self) -> bytes:
-        pass
-
-    @abstractmethod
     def as_dict(self) -> Dict[str, Any]:
         pass
 
