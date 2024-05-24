@@ -2,7 +2,9 @@ from typing import Any, Dict, Tuple, Type
 
 from hexbytes import HexBytes
 
-from .base import TransactionImplementation, copy_ensuring_int_transaction_type
+from .transaction_utils import copy_ensuring_int_transaction_type
+
+from .base import TransactionImplementation
 from .legacy_transactions import LegacyTransaction
 from cfx_utils.types import TxParam
 

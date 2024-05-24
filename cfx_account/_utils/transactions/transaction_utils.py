@@ -1,7 +1,7 @@
-from typing import Any
+from typing import Any, Dict
 
 from cfx_address import Base32Address
-from cfx_utils.types import TxDict
+from cfx_utils.types import TxDict, TxParam
 from eth_account._utils.validation import VALID_EMPTY_ADDRESSES, is_none
 from eth_utils.conversions import to_bytes, to_int
 from eth_utils.curried import (
@@ -13,7 +13,7 @@ from eth_utils.curried import (
 from eth_utils.types import is_bytes, is_string
 from rlp.sedes import BigEndianInt, Binary, CountableList
 from rlp.sedes import List as ListSedesClass
-from toolz import identity, merge
+from toolz import assoc, identity, merge
 
 
 def is_empty_or_valid_base32_address(val: Any) -> bool:
@@ -84,3 +84,23 @@ access_list_sede_type = CountableList(
         ]
     ),
 )
+
+# returns a copy of the transaction dict with the 'type' field converted to int
+def copy_ensuring_int_transaction_type(transaction_dict: TxParam) -> Dict[str, Any]:
+    if "type" not in transaction_dict:
+        if "gasPrice" in transaction_dict:
+            if "accessList" in transaction_dict:
+                # access list txn - type 1
+                return assoc(transaction_dict, "type", 1)
+            else:
+                return assoc(transaction_dict, "type", 0)
+        # elif any(
+        #     type_2_arg in transaction_dict
+        #     for type_2_arg in ("maxFeePerGas", "maxPriorityFeePerGas")
+        # ):
+        else:
+            return assoc(transaction_dict, "type", 2)
+    cpy = transaction_dict.copy()
+    if isinstance(cpy["type"], str):
+        cpy["type"] = int(cpy["type"], 16)
+    return cpy
