@@ -8,3 +8,5 @@ cfx_account.egg-info/
 __pycache__/
 .hypothesis/
 .vscode/
+.env
+*.ipynb
