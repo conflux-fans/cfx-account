@@ -71,8 +71,8 @@ setup(
     package_data={'cfx_account': ['py.typed']},
     install_requires=[
         "eth-account<0.11.0",
-        "cfx-address>=1.0.0",
-        "cfx-utils>=1.0.0"
+        "cfx-address>=1.2.0",
+        "cfx-utils>=1.0.4"
     ],  # add any additional packages that
     # needs to be installed along with your package. Eg: 'caer'
     extras_require=extras_require,
