@@ -20,6 +20,10 @@ def sign_transaction_dict(
         transaction_dict["gasPrice"] = to_int_if_drip_units(transaction_dict["gasPrice"])  # type: ignore
     if not transaction_dict.get("value") is None:
         transaction_dict["value"] = to_int_if_drip_units(transaction_dict["value"])  # type: ignore
+    if not transaction_dict.get("maxFeePerGas") is None:
+        transaction_dict["maxFeePerGas"] = to_int_if_drip_units(transaction_dict["maxFeePerGas"])  # type: ignore
+    if not transaction_dict.get("maxPriorityFeePerGas") is None:
+        transaction_dict["maxPriorityFeePerGas"] = to_int_if_drip_units(transaction_dict["maxPriorityFeePerGas"])  # type: ignore
     # generate RLP-serializable transaction, with defaults filled
     transaction = Transaction.from_dict(transaction_dict)
 
