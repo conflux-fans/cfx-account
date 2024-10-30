@@ -1,5 +1,9 @@
 # changelog
 
+## 1.1.1
+
+* fix: incompatible with eth-account 0.12.0
+
 ## 1.1.0
 
 * feat: enable dynamic fee transaction signing
