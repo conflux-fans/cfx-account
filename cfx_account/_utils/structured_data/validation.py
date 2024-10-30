@@ -6,7 +6,7 @@ from typing import (
 from eth_utils.exceptions import (
     ValidationError,
 )
-from eth_account._utils.structured_data.validation import (
+from cfx_account._utils.structured_data.eth_account_legacy_validation import (
     used_header_fields,
     validate_types_attribute,
     validate_primaryType_attribute,

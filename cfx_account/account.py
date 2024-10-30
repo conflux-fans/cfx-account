@@ -118,7 +118,7 @@ class Account(EthAccount):
         # They correspond to the same-named methods in Account.*
         # but without the private key argument
         """
-        key = self._parsePrivateKey(private_key)
+        key = self._parse_private_key(private_key)
         return LocalAccount(
             key,
             self,
@@ -206,7 +206,7 @@ class Account(EthAccount):
         transaction_hash = keccak(raw_transaction)
 
         return SignedTransaction(
-            rawTransaction=HexBytes(raw_transaction),
+            raw_transaction=HexBytes(raw_transaction),
             hash=HexBytes(transaction_hash),
             r=r,
             s=s,
@@ -241,7 +241,7 @@ class Account(EthAccount):
         # acct: LocalAccount = super().from_mnemonic(mnemonic, passphrase, account_path)
         seed = seed_from_mnemonic(mnemonic, passphrase)
         private_key = key_from_seed(seed, account_path)
-        key = self._parsePrivateKey(private_key)
+        key = self._parse_private_key(private_key)
         return LocalAccount(key, self, network_id or (self.w3 and self.w3.cfx.chain_id))
 
     @combomethod

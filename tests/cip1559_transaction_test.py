@@ -68,5 +68,5 @@ def test_cip1559_transaction_hashing_and_encoding():
 
 def test_signing_cip1559_transaction():
     acct = Account.create()
-    raw_tx = acct.sign_transaction(unsigned_cip1559_transaction_dict).rawTransaction
+    raw_tx = acct.sign_transaction(unsigned_cip1559_transaction_dict).raw_transaction
     assert raw_tx
