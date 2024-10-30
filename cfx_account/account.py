@@ -130,7 +130,8 @@ class Account(EthAccount):
 
     @combomethod
     def sign_transaction(
-        self, transaction_dict: TxParam, private_key: Union[bytes, str, PrivateKey]
+        self, transaction_dict: TxParam, private_key: Union[bytes, str, PrivateKey],
+        blobs: Optional[Any] = None,
     ) -> SignedTransaction:
         """
         Sign a transaction using a local private key. Produces signature details
