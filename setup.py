@@ -6,7 +6,7 @@ LONG_DESCRIPTION = 'Conflux account that can sign a conflux transaction'
 extras_require = {
     'tester': [
         "pytest>8,<9",
-        "conflux-web3>=1.3.0b3",
+        # "conflux-web3>=1.4.0",
     ],
     'linter': [
         # "black>=22.1.0,<23.0",
@@ -70,7 +70,7 @@ setup(
     packages=find_packages(),
     package_data={'cfx_account': ['py.typed']},
     install_requires=[
-        "eth-account<0.13.0",
+        "eth-account>=0.13.1",
         "cfx-address>=1.2.0",
         "cfx-utils>=1.0.5"
     ],  # add any additional packages that

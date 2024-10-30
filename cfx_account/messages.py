@@ -18,9 +18,10 @@ from hexbytes import (
     HexBytes,
 )
 
-from eth_account._utils.structured_data.hashing import (
-    hash_message as hash_eip712_message,
+from cfx_account._utils.structured_data.eth_account_legacy_hashing import (
+    hash_cip23_message,
 )
+
 from eth_account.messages import (
     SignableMessage
 )
@@ -69,7 +70,7 @@ def encode_structured_data(
     return SignableMessage(
         HexBytes(b'\x01'),
         hash_domain(structured_data), # type: ignore
-        hash_eip712_message(structured_data),
+        hash_cip23_message(structured_data),
     )
     
 def encode_defunct(

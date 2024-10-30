@@ -59,7 +59,7 @@ def test_sign_and_recover():
     assert_hex_equal(r, signed_tx.r)
     assert_hex_equal(s, signed_tx.s)
     assert_hex_equal(signed_tx_hash, signed_tx.hash)
-    assert_hex_equal(expected_raw_tx, signed_tx.rawTransaction)
+    assert_hex_equal(expected_raw_tx, signed_tx.raw_transaction)
     recovered_address = Account.recover_transaction(expected_raw_tx)
     assert recovered_address == address
 
@@ -72,7 +72,7 @@ def test_sign_and_recover_in_token():
     assert_hex_equal(r, signed_tx.r)
     assert_hex_equal(s, signed_tx.s)
     assert_hex_equal(signed_tx_hash, signed_tx.hash)
-    assert_hex_equal(expected_raw_tx, signed_tx.rawTransaction)
+    assert_hex_equal(expected_raw_tx, signed_tx.raw_transaction)
     recovered_address = Account.recover_transaction(expected_raw_tx)
     assert recovered_address == address
 
