@@ -1,4 +1,5 @@
 from cfx_account import Account
+from tests.test_utils import assert_hex_equal
 
 private_key = "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 keystore = {
@@ -23,8 +24,8 @@ keystore = {
 
 
 def test_decrypt():
-    assert Account.decrypt(keystore, "password").hex() == private_key
+    assert_hex_equal(Account.decrypt(keystore, "password"), private_key)
 
 def test_encrypt():
     encrypted = Account.encrypt(private_key, "password")
-    assert Account.decrypt(encrypted, "password").hex() == private_key
+    assert_hex_equal(Account.decrypt(encrypted, "password"), private_key)

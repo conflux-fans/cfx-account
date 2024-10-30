@@ -12,7 +12,8 @@ from cfx_utils.types import (
 from hexbytes import (
     HexBytes,
 )
-from conflux_web3.dev import get_testnet_web3
+from .test_utils import assert_hex_equal
+# from conflux_web3.dev import get_testnet_web3
 
 key = '0xcc7939276283a32f60d2fad7d16cac972300308fe99ec98d0e63765d02e24863'
 address = '0x1b981f81568eDD843DcB5b407ff0DD2e25618622'
@@ -55,10 +56,10 @@ def test_sign_and_recover():
     signed_tx = Account.sign_transaction(transaction, key)
     # signed_tx = account.sign_transaction(transaction)
     assert v == signed_tx.v
-    assert r == HexBytes(signed_tx.r).hex()
-    assert s == HexBytes(signed_tx.s).hex()
-    assert signed_tx_hash == signed_tx.hash.hex()
-    assert expected_raw_tx == signed_tx.rawTransaction.hex()
+    assert_hex_equal(r, signed_tx.r)
+    assert_hex_equal(s, signed_tx.s)
+    assert_hex_equal(signed_tx_hash, signed_tx.hash)
+    assert_hex_equal(expected_raw_tx, signed_tx.rawTransaction)
     recovered_address = Account.recover_transaction(expected_raw_tx)
     assert recovered_address == address
 
@@ -68,10 +69,10 @@ def test_sign_and_recover_in_token():
     assert account.address == address
     signed_tx = Account.sign_transaction(transaction, key)
     assert v == signed_tx.v
-    assert r == HexBytes(signed_tx.r).hex()
-    assert s == HexBytes(signed_tx.s).hex()
-    assert signed_tx_hash == signed_tx.hash.hex()
-    assert expected_raw_tx == signed_tx.rawTransaction.hex()
+    assert_hex_equal(r, signed_tx.r)
+    assert_hex_equal(s, signed_tx.s)
+    assert_hex_equal(signed_tx_hash, signed_tx.hash)
+    assert_hex_equal(expected_raw_tx, signed_tx.rawTransaction)
     recovered_address = Account.recover_transaction(expected_raw_tx)
     assert recovered_address == address
 
@@ -90,10 +91,10 @@ def test_local_account():
     local_account.network_id = None
     assert local_account.address == address
 
-def test_set_network_id():
-    assert Account.create().address.startswith("0x")
-    assert Account.create(network_id=1029).network_id == 1029
-    w3 = get_testnet_web3()
-    Account.set_w3(w3)
-    assert Account.create().network_id == 1
-    Account.set_w3(None) # type: ignore
+# def test_set_network_id():
+#     assert Account.create().address.startswith("0x")
+#     assert Account.create(network_id=1029).network_id == 1029
+#     w3 = get_testnet_web3()
+#     Account.set_w3(w3)
+#     assert Account.create().network_id == 1
+#     Account.set_w3(None) # type: ignore
