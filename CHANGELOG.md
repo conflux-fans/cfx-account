@@ -1,5 +1,9 @@
 # changelog
 
+## 1.2.0
+
+* bump eth-account to 0.13.1+
+
 ## 1.1.1
 
 * fix: incompatible with eth-account 0.12.0
