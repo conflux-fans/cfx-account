@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Any
+from typing import Any, Dict
 
 from eth_utils import (
     keccak,
@@ -30,7 +30,7 @@ from eth_account._utils.encode_typed_data.encoding_and_hashing import (
     encode_data,
 )
 
-def hash_cip23_message(structured_data: dict[str, Any]):
+def hash_cip23_message(structured_data: Dict[str, Any]):
     return keccak(
         encode_data(
             structured_data["primaryType"],
