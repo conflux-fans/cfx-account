@@ -1,5 +1,11 @@
 # changelog
 
+## 1.1.0
+
+* feat: enable dynamic fee transaction signing
+* deps: loosen eth-account dependency to < 0.13.0 (corresponding to web3.py 6.x)
+* chore: deprecate python3.7 add python 3.12 and 3.13 support
+
 ## 1.0.4
 
 * fix: restrict `eth-account` version
