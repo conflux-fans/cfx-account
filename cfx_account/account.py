@@ -165,10 +165,10 @@ class Account(EthAccount):
         >>> signed = Account.sign_transaction(transaction, key)
         {'hash': HexBytes('0x692a0ea530a264f4e80ce39f393233e90638ef929c8706802e15299fd0b042b9'),
             'r': 74715349327018893060702835194036838027583623083228589573427622179540208747230,
-            'rawTransaction': HexBytes('0xf861dd0101649413d2ba4ed43542e7c54fbb6c5fccb9f269c1f94c016464018080a0a52f639cbed11262a7b88d0a37aef909aa7dc2c36c40689a3d52b8bd1d9482dea054f3bdeb654f73704db4cbc12451fb4c9830ef62b0f24de1a40e4b6fe10f57b2'),  # noqa: E501
+            'raw_transaction': HexBytes('0xf861dd0101649413d2ba4ed43542e7c54fbb6c5fccb9f269c1f94c016464018080a0a52f639cbed11262a7b88d0a37aef909aa7dc2c36c40689a3d52b8bd1d9482dea054f3bdeb654f73704db4cbc12451fb4c9830ef62b0f24de1a40e4b6fe10f57b2'),  # noqa: E501
             's': 38424933894051759888751352802050752143518665905311311986258635963723328477106,
             'v': 0}
-        >>> w3.cfx.sendRawTransaction(signed.rawTransaction)
+        >>> w3.cfx.sendRawTransaction(signed.raw_transaction)
         """
         if not isinstance(transaction_dict, Mapping):
             raise TypeError(
