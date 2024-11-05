@@ -50,7 +50,7 @@ from eth_account.datastructures import (
 from cfx_account._utils.signing import (
     sign_transaction_dict,
 )
-from cfx_account._utils.transactions.legacy_transactions import (
+from cfx_account.transactions.legacy_transactions import (
     LegacyTransaction,
 )
 from cfx_address import (

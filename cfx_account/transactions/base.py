@@ -38,5 +38,5 @@ class TransactionImplementation(ABC):
         pass
     
     @abstractmethod
-    def encode(self) -> bytes:
+    def encode(self, *, allow_unsigned: bool = False) -> bytes:
         pass

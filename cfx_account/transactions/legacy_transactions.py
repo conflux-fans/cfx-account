@@ -1,4 +1,4 @@
-from typing import Any, Callable, ClassVar, Dict, Tuple, cast
+from typing import Any, Callable, ClassVar, Dict, Tuple, cast, Union
 
 import rlp
 from cfx_utils.types import TxParam
@@ -13,7 +13,7 @@ from eth_utils.curried import apply_formatters_to_dict
 from hexbytes import HexBytes
 from rlp.sedes import Binary, big_endian_int, binary
 
-from cfx_account._utils.transactions.transaction_utils import (
+from cfx_account.transactions.transaction_utils import (
     LEGACY_TRANSACTION_FORMATTERS,
     is_empty_or_valid_base32_address,
 )
@@ -49,7 +49,7 @@ class LegacyTransactionImpl(HashableRLP):
 class LegacyTransaction(TransactionImplementation):
 
     # ImplType: Type[HashableRLP]
-    # impl: HashableRLP
+    impl: Union[LegacyTransactionImpl, UnsignedLegacyTransactionImpl]
 
     transaction_type: ClassVar[int] = 0
 
@@ -105,11 +105,11 @@ class LegacyTransaction(TransactionImplementation):
     def is_signed(self) -> bool:
         return self.ImplType is LegacyTransactionImpl
 
-    def encode(self) -> bytes:
-        if not self.is_signed():
-            raise ValueError("Transaction is not signed")
-        else:
-            return rlp.encode(self.impl)
+    def encode(self, *, allow_unsigned: bool = False) -> bytes:
+        if (not self.is_signed()) and (not allow_unsigned):
+                raise ValueError("Transaction is not signed")
+       
+        return rlp.encode(self.impl)
 
     def vrs(self) -> Tuple[int, int, int]:
         if self.ImplType is LegacyTransactionImpl:

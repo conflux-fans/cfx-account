@@ -10,8 +10,8 @@ from rlp.sedes import Binary, big_endian_int, binary
 from toolz import dissoc, merge, partial, pipe
 from typing_extensions import Self
 
-from cfx_account._utils.transactions.base import TransactionImplementation
-from cfx_account._utils.transactions.transaction_utils import access_list_sede_type
+from cfx_account.transactions.base import TransactionImplementation
+from cfx_account.transactions.transaction_utils import access_list_sede_type
 
 from .transaction_utils import TYPED_TRANSACTION_FORMATTERS
 
@@ -94,19 +94,7 @@ class CIP1559Transaction(TransactionImplementation):
         ``keccak256(b'cfx' || 0x02 || rlp([nonce, maxPriorityFeePerGas,
         maxFeePerGas, gas, to, value, data, storageLimit, epochHeight, accessList]))``
         """
-        transaction_without_signature_fields = dissoc(self._dictionary, "v", "r", "s")
-        rlp_structured_txn_without_sig_fields = transaction_rpc_to_rlp_structure(
-            transaction_without_signature_fields
-        )
-        rlp_serializer = self.__class__._unsigned_transaction_serializer
-        hash = pipe(
-            rlp_serializer.from_dict(rlp_structured_txn_without_sig_fields),  # type: ignore  # noqa: E501
-            lambda val: rlp.encode(val),  # type: ignore
-            # (b'cfx' || 0x02 || rlp([...]))
-            lambda val: HexBytes(b"cfx") + HexBytes("0x02") + HexBytes(val),  # type: ignore
-            keccak,  # keccak256(0x02 || rlp([...]))
-        )
-        return hash
+        return keccak(self._encode_unsigned())
 
     def as_dict(self) -> Dict[str, Any]:
         return self._dictionary
@@ -125,8 +113,21 @@ class CIP1559Transaction(TransactionImplementation):
             raise ValueError("attempting to sign a signed transaction")
         self._dictionary.update({"v": v, "r": r, "s": s})
         return self
+    
+    def _encode_unsigned(self) -> bytes:
+        transaction_without_signature_fields = dissoc(self._dictionary, "v", "r", "s")
+        rlp_structured_txn_without_sig_fields = transaction_rpc_to_rlp_structure(
+            transaction_without_signature_fields
+        )
+        rlp_serializer = self.__class__._unsigned_transaction_serializer
+        return pipe(
+            rlp_serializer.from_dict(rlp_structured_txn_without_sig_fields),  # type: ignore  # noqa: E501
+            lambda val: rlp.encode(val),  # type: ignore
+            # (b'cfx' || 0x02 || rlp([...]))
+            lambda val: HexBytes(b"cfx") + HexBytes("0x02") + HexBytes(val),  # type: ignore
+        )
 
-    def encode(self) -> bytes:
+    def encode(self, *, allow_unsigned: bool = False) -> bytes:
         """
         Returns this raw transaction as bytes.
 
@@ -140,7 +141,9 @@ class CIP1559Transaction(TransactionImplementation):
             data, accessList, signatureYParity, signatureR, signatureS])
         """
         if not self.is_signed():
-            raise ValueError("attempting to encode an unsigned transaction")
+            if not allow_unsigned:
+                raise ValueError("attempting to encode an unsigned transaction without allow_unsigned=True")
+            return self._encode_unsigned()
         rlp_serializer = self.__class__._signed_transaction_serializer
         rlp_structured_dict = transaction_rpc_to_rlp_structure(self._dictionary)
         tx_meta = dissoc(rlp_structured_dict, "v", "r", "s")

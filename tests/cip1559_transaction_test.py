@@ -1,6 +1,6 @@
 from cfx_address import Base32Address
 from cfx_account import Account
-from cfx_account._utils.transactions.cip1559_transactions import CIP1559Transaction
+from cfx_account.transactions.cip1559_transactions import CIP1559Transaction
 from tests.test_utils import assert_hex_equal
 
 signed_cip1559_transaction_dict = {
