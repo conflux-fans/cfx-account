@@ -8,7 +8,7 @@ from cfx_utils.token_unit import (
     to_int_if_drip_units,
 )
 
-from .transactions.transactions import (
+from ..transactions.transactions import (
     Transaction,
 )
 
