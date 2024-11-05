@@ -1,5 +1,10 @@
 # changelog
 
+## 1.2.1
+
+* expose internal transaction impl module
+* allow unsigned transaction encoding
+
 ## 1.2.0
 
 * bump eth-account to 0.13.1+
