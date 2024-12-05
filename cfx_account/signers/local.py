@@ -95,6 +95,18 @@ class LocalAccount(EthLocalAccount):
         return to_checksum_address(eth_eoa_address_to_cfx_hex(super().address))
     
     @property
+    def base32_address(self) -> Base32Address:
+        """
+        Returns the address of the account in base32 format.
+        Raises ValueError if network id is not set.
+
+        :return Base32Address: the address in base32 format
+        """
+        if not self._network_id:
+            raise ValueError("Network id is not set. Please set it using `account.network_id = <network_id>`")
+        return Base32Address(self.address, self._network_id)
+
+    @property
     def key(self) -> bytes:
         """
         Get the private key.

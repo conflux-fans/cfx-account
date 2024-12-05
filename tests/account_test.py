@@ -53,6 +53,8 @@ transaction_value_in_token = {
 def test_sign_and_recover():
     account = Account.from_key(key)
     assert account.address == address
+    with pytest.raises(ValueError):
+        account.base32_address
     signed_tx = Account.sign_transaction(transaction, key)
     # signed_tx = account.sign_transaction(transaction)
     assert v == signed_tx.v
@@ -62,6 +64,10 @@ def test_sign_and_recover():
     assert_hex_equal(expected_raw_tx, signed_tx.raw_transaction)
     recovered_address = Account.recover_transaction(expected_raw_tx)
     assert recovered_address == address
+    
+    account.network_id = 1
+    assert account.address == base32_address
+    assert account.base32_address == base32_address
 
 def test_sign_and_recover_in_token():
     transaction = transaction_value_in_token
