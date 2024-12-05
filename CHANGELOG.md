@@ -1,5 +1,9 @@
 # changelog
 
+## 1.2.2
+
+* feat: add local account property `base32_address` that returns the address in base32 format
+
 ## 1.2.1
 
 * expose internal transaction impl module
